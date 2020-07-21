@@ -8,6 +8,183 @@
 
 using namespace std::chrono;
 
+int CFR::getStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const {
+
+	int64_t index = node->getIndex();
+	int bucket = 0;
+
+	if (card_abs->canPrecomputeBuckets())
+		bucket = hand.precomputed_bucket[position][node->getRound()];
+	else
+		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
+
+	return stored[node->getRound()]->getStrategy(index, bucket, node->getNumAction(), strategy);
+}
+
+int CFR::getAverageStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const {
+	int64_t index = node->getIndex();
+	int bucket = 0;
+
+	if (card_abs->canPrecomputeBuckets())
+		bucket = hand.precomputed_bucket[position][node->getRound()];
+	else
+		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
+
+	return stored[node->getRound()]->getAverageStrategy(index, bucket, node->getNumAction(), strategy);
+}
+
+void CFR::updateRegret(const BettingNode* node, const Hand hand, const int position, std::vector<double> regret) {
+
+	int64_t index = node->getIndex();
+	int bucket = 0;
+
+	if (card_abs->canPrecomputeBuckets())
+		bucket = hand.precomputed_bucket[position][node->getRound()];
+	else
+		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
+
+	stored[node->getRound()]->updateRegret(index, bucket, regret);
+}
+
+void CFR::updateStrategySum(const BettingNode* node, const Hand hand, const int position, std::vector<double> strategy) {
+	int64_t index = node->getIndex();
+	int bucket = 0;
+
+	if (card_abs->canPrecomputeBuckets())
+		bucket = hand.precomputed_bucket[position][node->getRound()];
+	else
+		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
+
+	stored[node->getRound()]->updateStrategySum(index, bucket, strategy);
+}
+
+void CFR::printRegretSum(std::string fileName) const{
+	std::fstream file;
+	file.open(fileName, std::ios::out);
+
+	if (!file) {
+		assert(0);
+	}
+
+	file << "method = " + methodName() + "\n";
+	file << "data = regret_sum\n";
+
+	for (int i = 0; i < game->numRounds; i++) {
+		file << "START OF ROUND " << i << "\n";
+		file.close();
+		stored[i]->printRegretSum(fileName);
+		file.open(fileName, std::ios::out | std::ios::app);
+		file << "END OF ROUND " << i << "\n";
+	}
+	file.close();
+	return;
+}
+
+void CFR::printStrategySum(std::string fileName) const{
+	std::fstream file;
+	file.open(fileName, std::ios::out);
+
+	if (!file) {
+		assert(0);
+	}
+
+	file << "method = " + methodName() + "\n";
+	file << "data = strategy_sum\n";
+	file << "size = ";
+	for (int i = 0; i < game->numRounds; i++) {
+		file << stored[i]->getStrategySumSize() << " ";
+	}
+	file << "\n";
+
+	for (int i = 0; i < game->numRounds; i++) {
+		file << "START OF ROUND " << i << "\n\n";
+		file.close();
+		stored[i]->printStrategySum(fileName);
+		file.open(fileName, std::ios::out | std::ios::app);
+		file << "END OF ROUND " << i << "\n";
+	}
+	file.close();
+	return;
+}
+
+void CFR::readFile(std::string fileName) {
+
+	std::fstream file;
+	file.open(fileName, std::ios::in | std::ios::app);
+
+	char buffer[200];
+
+	file.getline(buffer, sizeof(buffer));
+	std::string method = methodName();
+	method = "method = " + method;
+	if (strncmp(buffer, method.c_str(), sizeof(method.c_str()))) {
+		std::cout << "Invalid File : method inconsistent\n";
+		return;
+	}
+
+	file.getline(buffer, sizeof(buffer));
+	if (!strncmp(buffer, "data = regret_sum", 17)) {
+		file.read(buffer, 6);
+		if (!strncmp(buffer, "size =", 6)) {
+			for (int i = 0; i < game->numRounds; i++) {
+				long size;
+				file >> size;
+				stored[i]->resizeRegretSum(size);
+			}
+		}
+		file.getline(buffer, sizeof(buffer));
+		int round = -1;
+		while (file.getline(buffer, sizeof(buffer))) {
+			if (!strncmp(buffer, "START OF ROUND", 14)) {
+				round++;
+				continue;
+			}
+
+			if (!strncmp(buffer, " END OF ROUND", 13)) {
+				continue;
+			}
+
+			int64_t index;
+			double data;
+			file >> index >> data;
+			stored[round]->writeRegretSum(index, data);
+		}
+		file.close();
+	}
+	else if (!strncmp(buffer, "data = strategy_sum", 19)) {
+		file.read(buffer, 6);
+		if (!strncmp(buffer, "size =", 6)) {
+			for (int i = 0; i < game->numRounds; i++) {
+				long size;
+				file >> size;
+				stored[i]->resizeStrategySum(size);
+			}
+		}
+		file.getline(buffer, sizeof(buffer));
+		int round = -1;
+		while (file.getline(buffer, sizeof(buffer))) {
+			if (!strncmp(buffer, "START OF ROUND", 14)) {
+				round++;
+				continue;
+			}
+
+			if (!strncmp(buffer, " END OF ROUND", 13)) {
+				continue;
+			}
+
+			int64_t index;
+			double data;
+			file >> index >> data;
+			stored[round]->writeStrategySum(index, data);
+		}
+		file.close();
+	}
+	else {
+		std::cout << "Invalid File : undefine data type\n";
+		return;
+	}
+}
+
 VanillaCfr::VanillaCfr(const Game* new_game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs) {
 
 	
@@ -163,7 +340,7 @@ double VanillaCfr::computeExploitability(const BettingNode* node, const Hand han
 	}
 }
 
-double VanillaCfr::getExploitabilitybyMonte(const BettingNode* root) const {
+double VanillaCfr::getExploitability(const BettingNode* root) const {
 
 	double sum = 0;
 	for (int iter = 0; iter < EXPLOITABILITY_MONTE_ITERATE_TIMES; iter++) {
@@ -176,28 +353,6 @@ double VanillaCfr::getExploitabilitybyMonte(const BettingNode* root) const {
 	}
 
 	return sum;
-}
-
-void VanillaCfr::printRegretSum(std::string fileName) {
-	std::fstream file;
-	file.open(fileName, std::ios::out);
-
-	if (!file) {
-		assert(0);
-	}
-
-	file << "method = Vanilla Cfr\n";
-	file << "data = regret_sum\n";
-
-	for (int i = 0; i < game->numRounds; i++) {
-		file << "START OF ROUND " << i << "\n";
-		file.close();
-		stored[i]->printRegretSum(fileName);
-		file.open(fileName, std::ios::out | std::ios::app);
-		file << "END OF ROUND " << i << "\n";
-	}
-	file.close();
-	return;
 }
 
 //RealProb test
@@ -401,135 +556,10 @@ double VanillaCfr_RPB::walkTree(const int position, const BettingNode* cur_node,
 	return return_value;
 }
 
-void VanillaCfr_RPB::printRegretSum(std::string fileName) {
-	std::fstream file;
-	file.open(fileName, std::ios::out);
-
-	if (!file) {
-		assert(0);
-	}
-
-	file << "method = Vanilla Cfr\n";
-	file << "data = regret_sum\n";
-	file << "size = ";
-	for (int i = 0; i < game->numRounds; i++) {
-		file << stored[i]->getRegretSumSize() << " ";
-	}
-	file << "\n";
-
-	for (int i = 0; i < game->numRounds; i++) {
-		file << "START OF ROUND " << i << "\n\n";
-		file.close();
-		stored[i]->printRegretSum(fileName);
-		file.open(fileName, std::ios::out | std::ios::app);
-		file << "END OF ROUND " << i << "\n";
-	}
-	file.close();
-	return;
+void VanillaCfr_RPB::doIteration(const BettingNode* root) {
+	doIteration(root, 1);
 }
 
-void VanillaCfr_RPB::printStrategySum(std::string fileName) {
-	std::fstream file;
-	file.open(fileName, std::ios::out);
-
-	if (!file) {
-		assert(0);
-	}
-
-	file << "method = Vanilla Cfr\n";
-	file << "data = strategy_sum\n";
-	file << "size = ";
-	for (int i = 0; i < game->numRounds; i++) {
-		file << stored[i]->getStrategySumSize() << " ";
-	}
-	file << "\n";
-
-	for (int i = 0; i < game->numRounds; i++) {
-		file << "START OF ROUND " << i << "\n\n";
-		file.close();
-		stored[i]->printStrategySum(fileName);
-		file.open(fileName, std::ios::out | std::ios::app);
-		file << "END OF ROUND " << i << "\n";
-	}
-	file.close();
-	return;
-}
-
-void VanillaCfr_RPB::readFile(std::string fileName) {
-
-	std::fstream file;
-	file.open(fileName, std::ios::in | std::ios::app);
-
-	char buffer[200];
-
-	file.getline(buffer,sizeof(buffer));
-	if (strncmp(buffer, "method = Vanilla Cfr", 20)) {
-		std::cout << "Invalid File : method inconsistent\n";
-		return;
-	}
-
-	file.getline(buffer, sizeof(buffer));
-	if (!strncmp(buffer, "data = regret_sum", 17)) {
-		file.read(buffer, 6);
-		if (!strncmp(buffer, "size =", 6)) {
-			for (int i = 0; i < game->numRounds; i++) {
-				long size;
-				file >> size;
-				stored[i]->resizeRegretSum(size);
-			}
-		}
-		file.getline(buffer, sizeof(buffer));
-		int round = -1;
-		while (file.getline(buffer, sizeof(buffer))) {
-			if (!strncmp(buffer, "START OF ROUND", 14)) {
-				round++;
-				continue;
-			}
-
-			if (!strncmp(buffer, " END OF ROUND", 13)) {
-				continue;
-			}
-
-			int64_t index;
-			double data;
-			file >> index >> data;
-			stored[round] -> writeRegretSum(index, data);
-		}
-		file.close();
-	}
-	else if (!strncmp(buffer, "data = strategy_sum", 19)) {
-		file.read(buffer, 6);
-		if (!strncmp(buffer, "size =", 6)) {
-			for (int i = 0; i < game->numRounds; i++) {
-				long size;
-				file >> size;
-				stored[i]->resizeStrategySum(size);
-			}
-		}
-		file.getline(buffer, sizeof(buffer));
-		int round = -1;
-		while (file.getline(buffer, sizeof(buffer))) {
-			if (!strncmp(buffer, "START OF ROUND", 14)) {
-				round++;
-				continue;
-			}
-
-			if (!strncmp(buffer, " END OF ROUND", 13)) {
-				continue;
-			}
-
-			int64_t index;
-			double data;
-			file >> index >> data;
-			stored[round]->writeStrategySum(index, data);
-		}
-		file.close();
-	}
-	else {
-		std::cout << "Invalid File : undefine data type\n";
-		return;
-	}
-}
 
 //END of RPB
 
@@ -621,31 +651,6 @@ double ES::walkTree(const int position, const BettingNode* cur_node, const Hand 
 	return return_value;
 }
 
-int ES::getStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const{
-	
-	int64_t index = node->getIndex();
-	int bucket = 0;
-
-	if (card_abs->canPrecomputeBuckets())
-		bucket = hand.precomputed_bucket[position][node->getRound()];
-	else
-		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards,position);
-
-	return stored[node->getRound()] -> getStrategy(index, bucket, node->getNumAction(), strategy);
-}
-
-void ES::updateRegret(const BettingNode* node, const Hand hand, const int position, std::vector<double> regret) {
-	int64_t index = node->getIndex();
-	int bucket = 0;
-
-	if (card_abs->canPrecomputeBuckets())
-		bucket = hand.precomputed_bucket[position][node->getRound()];
-	else
-		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
-
-	stored[node->getRound()] -> updateRegret(index,bucket,regret);
-}
-
 int ES::sampleAction(const BettingNode* node, const Hand hand, const int position) {
 	
 	int64_t index = node->getIndex();
@@ -698,7 +703,7 @@ double ES::computeExploitability(const BettingNode* node, const Hand hand, const
 	}
 }
 
-double ES::getExploitabilitybyMonte(const BettingNode* root) const {
+double ES::getExploitability(const BettingNode* root) const {
 
 	double sum = 0;
 	for (int iter = 0; iter < EXPLOITABILITY_MONTE_ITERATE_TIMES; iter++) {
@@ -711,26 +716,4 @@ double ES::getExploitabilitybyMonte(const BettingNode* root) const {
 	}
 
 	return sum;
-}
-
-void ES::printRegretSum(std::string fileName) {
-	std::fstream file;
-	file.open(fileName, std::ios::out);
-
-	if (!file) {
-		assert(0);
-	}
-
-	file << "method = Vanilla Cfr\n";
-	file << "data = regret_sum\n";
-
-	for (int i = 0; i < game->numRounds; i++) {
-		file << "START OF ROUND " << i << "\n";
-		file.close();
-		stored[i]->printRegretSum(fileName);
-		file.open(fileName, std::ios::out | std::ios::app);
-		file << "END OF ROUND " << i << "\n";
-	}
-	file.close();
-	return;
 }
