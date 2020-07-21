@@ -290,6 +290,13 @@ void EHS_Bucketing::precomputeBuckets(const Game* game, Hand& hand) const {
 	}
 }
 
+void EHS_Bucketing::precomputeBuckets(const Game* game, Hand& hand, const int position) const{
+	hand.precomputed_bucket[position][0] = getBucket_preflop(hand.board_cards, hand.hole_cards, position);
+	hand.precomputed_bucket[position][1] = getBucket_flop(hand.board_cards, hand.hole_cards, position);
+	hand.precomputed_bucket[position][2] = getBucket_turn(hand.board_cards, hand.hole_cards, position);
+	hand.precomputed_bucket[position][3] = getBucket_river(hand.board_cards, hand.hole_cards, position);
+}
+
 RealProbBucketing_train::RealProbBucketing_train(){}
 
 RealProbBucketing_train::~RealProbBucketing_train(){}

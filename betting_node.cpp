@@ -45,6 +45,17 @@ InfoSet::~InfoSet() {
 
 }
 
+const BettingNode* InfoSet::doAction(const int action) const {
+
+	assert(action < num_choice);
+	const BettingNode* cur = this -> child;
+	for (int i = 0; i < action; i++) {
+		cur = cur->getSibiling();
+	}
+
+	return cur;
+}
+
 BettingNode* initBettingTree(State& state,
 	const Game* game,
 	const ActionAbstraction* action_abstraction,

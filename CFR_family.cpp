@@ -58,6 +58,19 @@ void CFR::updateStrategySum(const BettingNode* node, const Hand hand, const int 
 	stored[node->getRound()]->updateStrategySum(index, bucket, strategy);
 }
 
+int CFR::sampleAction(const BettingNode* node, const Hand hand, const int position) const{
+
+	int64_t index = node->getIndex();
+	int bucket = 0;
+
+	if (card_abs->canPrecomputeBuckets())
+		bucket = hand.precomputed_bucket[position][node->getRound()];
+	else
+		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
+
+	return stored[node->getRound()]->sampleAction(index, bucket, node->getNumAction());
+}
+
 void CFR::printRegretSum(std::string fileName) const{
 	std::fstream file;
 	file.open(fileName, std::ios::out);
@@ -651,19 +664,6 @@ double ES::walkTree(const int position, const BettingNode* cur_node, const Hand 
 	return return_value;
 }
 
-int ES::sampleAction(const BettingNode* node, const Hand hand, const int position) {
-	
-	int64_t index = node->getIndex();
-	int bucket = 0;
-
-	if (card_abs->canPrecomputeBuckets())
-		bucket = hand.precomputed_bucket[position][node->getRound()];
-	else
-		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
-
-	return stored[node->getRound()]->sampleAction(index, bucket, node->getNumAction());
-}
-
 double ES::computeExploitability(const BettingNode* node, const Hand hand, const int position) const{
 
 	if (node->getChild() == NULL) {
@@ -713,6 +713,43 @@ double ES::getExploitability(const BettingNode* root) const {
 		for (int p = 0; p < game->numPlayers; p++) {
 			sum += computeExploitability(root, hand, p) / EXPLOITABILITY_MONTE_ITERATE_TIMES;
 		}
+	}
+
+	return sum;
+}
+
+double battle(const Game* game, const BettingNode* root, const CFR* p1, const CFR* p2, const int round) {
+	double sum = 0;
+
+	for (int i = 0; i < round; i++) {
+		Hand hand = generateHand(game);
+		p1->getCardAbstraction()->precomputeBuckets(game, hand,0);
+		p2->getCardAbstraction()->precomputeBuckets(game, hand, 1);
+
+		const BettingNode* current = root;
+
+		while (current ->getChild() != nullptr){
+			if (current->getPlayer())
+				current->doAction(p2->sampleAction(current, hand, 1));
+			else
+				current->doAction(p1->sampleAction(current, hand, 0));
+		}
+
+		sum += current->evaluate(hand, 0) / round;
+
+		p1->getCardAbstraction()->precomputeBuckets(game, hand, 1);
+		p2->getCardAbstraction()->precomputeBuckets(game, hand, 0);
+
+		current = root;
+
+		while (current->getChild() != nullptr) {
+			if (!current->getPlayer())
+				current->doAction(p2->sampleAction(current, hand, 1));
+			else
+				current->doAction(p1->sampleAction(current, hand, 0));
+		}
+
+		sum += current->evaluate(hand, 1) / round;
 	}
 
 	return sum;

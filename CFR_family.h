@@ -25,11 +25,15 @@ public:
 	virtual int getAverageStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const;
 	virtual void updateRegret(const BettingNode* node, const Hand hand, const int position, std::vector<double> regret);
 	virtual void updateStrategySum(const BettingNode* node, const Hand hand, const int position, std::vector<double> strategy);
+	virtual int sampleAction(const BettingNode* node, const Hand hand, const int position) const;
 
 	virtual void printRegretSum(std::string fileName) const;
 	virtual void printStrategySum(std::string fileName) const;
 
 	virtual void readFile(std::string fileName);
+
+	virtual const CardAbstraction* getCardAbstraction() const{ return card_abs; }
+	virtual const Game* getGame() const{ return game; }
 protected:
 
 	virtual std::string methodName() const = 0;
@@ -101,8 +105,6 @@ public:
 	virtual void doIteration(const BettingNode* root, const int time);
 	double walkTree(const int position, const BettingNode* cur_node, const Hand hand);
 
-	int sampleAction(const BettingNode* node, const Hand hand, const int position);
-
 	virtual double getExploitability(const BettingNode* root) const;
 
 	static int go_through;
@@ -114,5 +116,7 @@ private:
 	double computeExploitability(const BettingNode* node,const Hand hand, const int position) const;
 
 };
+
+double battle(const Game* game, const BettingNode* root, const CFR* p1, const CFR* p2, const int round);
 
 #endif // !CFR_FAMILY_H

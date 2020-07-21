@@ -21,6 +21,7 @@ public:
 
 	virtual bool canPrecomputeBuckets() const { return false; }
 	virtual void precomputeBuckets(const Game* game, Hand& hand) const { };
+	virtual void precomputeBuckets(const Game* game, Hand& hand, const int position) const { };
 };
 
 class EHS_Bucketing : public CardAbstraction {
@@ -36,6 +37,7 @@ public:
 
 	virtual bool canPrecomputeBuckets() const;
 	virtual void precomputeBuckets(const Game* game, Hand& hand) const;
+	virtual void precomputeBuckets(const Game* game, Hand& hand, const int position) const;
 
 private:
 

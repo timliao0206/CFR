@@ -29,6 +29,8 @@ public:
 	virtual int8_t did_player_fold(const int position) const { assert(0); return 0; }
 	virtual int getPot() const { assert(0); return 0; }
 
+	virtual const BettingNode* doAction(int action)const { assert(0); return nullptr; };
+
 protected:
 	BettingNode* sibling;
 	
@@ -66,6 +68,8 @@ public:
 	virtual int8_t getNumAction() const { return num_choice; }
 	virtual int8_t getPlayer() const { return player; }
 	virtual int8_t getRound() const { return round; }
+
+	virtual const BettingNode* doAction(const int action) const;
 
 	virtual const BettingNode* getChild() const { return child; }
 
