@@ -25,6 +25,7 @@ Copyright (C) 2011 by the Computer Poker Research Group, University of Alberta
 #include "evalHandTable.h"
 #include <bitset>
 #include <vector>
+#include <assert.h>
 
 const int eval::twoCardRank[52][52] = { 
 {77,169,168,166,167,165,158,149,135,121,106,87,60,77,169,168,166,167,165,158,149,135,121,106,87,60,77,169,168,166,167,165,158,149,135,121,106,87,60,77,169,168,166,167,165,158,149,135,121,106,87,60},
@@ -4325,7 +4326,7 @@ void eval::addCardToCardSet(CardSet* c, int suit, int rank)
     c->cards |= (uint64_t)1 << ((suit << 4) + rank);
 }
 
-int eval::rankInAllCards(const CardSet cards) {
+int eval::rankTwoCards(const CardSet cards) {
     std::vector<int> card;
 
     int64_t copy = cards.cards;
@@ -4338,10 +4339,8 @@ int eval::rankInAllCards(const CardSet cards) {
         if (copy == 0) break;
     }
 
-    if (card.size()== 0) return -1;
+    assert(card.size() == 2);
 
-    if (card.size() == 2) {
-        return twoCardRank[card[0]][card[1]];
-    }
-
+    
+    return twoCardRank[card[0]][card[1]];
 }

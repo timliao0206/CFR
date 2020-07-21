@@ -27,6 +27,7 @@ public:
 	virtual int8_t getPlayer() const { assert(0); return 0; }
 	virtual int8_t getRound() const { assert(0); return 0; }
 	virtual int8_t did_player_fold(const int position) const { assert(0); return 0; }
+	virtual int getPot() const { assert(0); return 0; }
 
 protected:
 	BettingNode* sibling;
@@ -36,17 +37,18 @@ protected:
 class TerminalNode: public BettingNode{
 public:
 
-	TerminalNode(const bool new_showdown, const int8_t new_fold[2] , const int8_t new_pot);
+	TerminalNode(const bool new_showdown, const int8_t new_fold[2] , const int16_t new_pot);
 	virtual ~TerminalNode();
 
 	virtual BettingNode* getChild() const { return NULL; }
 
 	virtual double evaluate(const Hand& hand, const int position) const;
+	virtual int getPot() const { return pot; }
 
 protected:
 	const bool showdown;
 	int8_t fold[2];
-	const int8_t pot;
+	const int16_t pot;
 };
 
 class InfoSet: public BettingNode {

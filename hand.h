@@ -24,6 +24,8 @@ public:
 
 Hand generateHand(const Game* game);
 
+Hand generateEmptyHand();
+
 int dealCard(std::vector<int>& desk);
 
 #endif // !HAND_H

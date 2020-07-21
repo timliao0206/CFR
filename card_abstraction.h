@@ -50,4 +50,23 @@ private:
 	static const int index_to_card_two[1326];
 };
 
+class RealProbBucketing_train{
+public:
+
+	RealProbBucketing_train();
+	virtual ~RealProbBucketing_train();
+
+	virtual int numBucket(const Game* game, const BettingNode* node) const { return 10; }
+	virtual int numBucket(const Game* game, const State& state) const { return 10; }
+	virtual bool canPrecomputeBucket() const { return true; }
+	virtual int getBucket(const Game* game, const BettingNode* node,
+		const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const {
+		assert(false);
+		return 0;
+	};
+
+	void precomputeBucket(Hand& hand, int prob[MAX_PLAYERS]) const;
+	virtual void precomputeBuckets(const Game* game, Hand& hand) const { assert(false); }
+};
+
 #endif // !CARD_ABSTRACTION_H

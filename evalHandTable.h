@@ -28,7 +28,7 @@ public:
 	static int rankCardset(const CardSet cards);
 	static CardSet emptyCardset();
 	static void addCardToCardSet(CardSet* c, int suit, int rank);
-	static int rankInAllCards(const CardSet cards);
+	static int rankTwoCards(const CardSet cards);
 
 };
 #endif

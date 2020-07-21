@@ -74,3 +74,25 @@ int dealCard(std::vector<int>& desk) {
 
 	return ans;
 }
+
+Hand generateEmptyHand() {
+	Hand hand;
+	for (int i = 0; i < MAX_BOARD_CARDS; i++) {
+		hand.board_cards[i] = -1;
+	}
+
+	for (int i = 0; i < MAX_PLAYERS; i++) {
+		for (int j = 0; j < MAX_HOLE_CARDS; j++) {
+			hand.hole_cards[i][j] = -1;
+		}
+
+		for (int j = 0; j < MAX_ROUNDS; j++) {
+			hand.precomputed_bucket[i][j] = -1;
+		}
+	}
+
+	hand.show_down_value[0] = 0;
+	hand.show_down_value[1] = 0;
+
+	return hand;
+}

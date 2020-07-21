@@ -11,7 +11,7 @@ BettingNode::~BettingNode() {
 
 }
 
-TerminalNode::TerminalNode(const bool new_showdown, const int8_t new_fold[2], const int8_t new_pot)
+TerminalNode::TerminalNode(const bool new_showdown, const int8_t new_fold[2], const int16_t new_pot)
   : BettingNode(),
 	showdown(new_showdown),
 	pot(new_pot)
@@ -59,7 +59,7 @@ BettingNode* initBettingTree(State& state,
 
 		if (fold) {
 			fold_value[0] = state.playerFolded[0] != 0 ? -1 : 1;
-			fold_value[1] = state.playerFolded[1] != 0 ? 1 : -1;
+			fold_value[1] = state.playerFolded[1] != 0 ? -1 : 1;
 			money = state.spent[(state.playerFolded[0] != 0 ? 0 : 1)];
 		}
 		else {
