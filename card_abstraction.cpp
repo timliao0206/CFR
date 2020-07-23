@@ -2,6 +2,7 @@
 #include "evalHandTable.h"
 #include <vector>
 #include <algorithm>
+#include "FiveCardBucket.h"
 
 CardAbstraction::CardAbstraction() {
 
@@ -171,8 +172,7 @@ int EHS_Bucketing::getBucket_preflop(const int8_t board_cards[MAX_BOARD_CARDS], 
 int EHS_Bucketing::getBucket_flop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS],
 			const int position) const {
 
-	//TO-DO
-	return 1;
+	return getFlopBucketByHandStrength(board_cards,hole_cards,position);
 }
 
 int EHS_Bucketing::getBucket_turn(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS],
@@ -285,7 +285,7 @@ void EHS_Bucketing::precomputeBuckets(const Game* game, Hand& hand) const {
 	for (int i = 0; i < game->numPlayers; i++) {
 		hand.precomputed_bucket[i][0] = getBucket_preflop(hand.board_cards, hand.hole_cards, i);
 		hand.precomputed_bucket[i][1] = getBucket_flop(hand.board_cards, hand.hole_cards, i);
-		hand.precomputed_bucket[i][2] = getBucket_turn(hand.board_cards, hand.hole_cards, i);
+		hand.precomputed_bucket[i][2] = hand.precomputed_bucket[i][1];//tmp
 		hand.precomputed_bucket[i][3] = getBucket_river(hand.board_cards, hand.hole_cards, i);
 	}
 }
@@ -293,7 +293,7 @@ void EHS_Bucketing::precomputeBuckets(const Game* game, Hand& hand) const {
 void EHS_Bucketing::precomputeBuckets(const Game* game, Hand& hand, const int position) const{
 	hand.precomputed_bucket[position][0] = getBucket_preflop(hand.board_cards, hand.hole_cards, position);
 	hand.precomputed_bucket[position][1] = getBucket_flop(hand.board_cards, hand.hole_cards, position);
-	hand.precomputed_bucket[position][2] = getBucket_turn(hand.board_cards, hand.hole_cards, position);
+	hand.precomputed_bucket[position][2] = hand.precomputed_bucket[position][1];//tmp
 	hand.precomputed_bucket[position][3] = getBucket_river(hand.board_cards, hand.hole_cards, position);
 }
 

@@ -12,6 +12,7 @@
 #include "CFR_family.h"
 #include "evalHandTable.h"
 #include <ctime>
+#include "FiveCardBucket.h"
 
 int main()
 {
@@ -33,7 +34,7 @@ int main()
     int num_bucket[4] = { 10,10,10,10 };
     const CardAbstraction* card_abs = new EHS_Bucketing(num_bucket);
 
-    /*VanillaCfr cfr(game, num_entries_per_bucket, card_abs);
+    VanillaCfr cfr(game, num_entries_per_bucket, card_abs);
 
     const int printFreq = 1;
 
@@ -43,16 +44,16 @@ int main()
         cfr.doIteration(root,1);
 
         if (i == 10) {
-            cfr.printRegretSum("Vanilla_Cfr_10_RegretSum");
-            cfr.printStrategySum("Vanilla_Cfr_10_StrategySum");
+            cfr.printRegretSum("RunData/Vanilla_Cfr_10_RegretSum_WithFlopBucket");
+            cfr.printStrategySum("RunData/Vanilla_Cfr_10_StrategySum_WithFlopBucket");
         }
         else if (i == 100) {
-            cfr.printRegretSum("Vanilla_Cfr_100_RegretSum");
-            cfr.printStrategySum("Vanilla_Cfr_100_StrategySum");
+            cfr.printRegretSum("RunData/Vanilla_Cfr_100_RegretSum_WithFlopBucket");
+            cfr.printStrategySum("RunData/Vanilla_Cfr_100_StrategySum_WithFlopBucket");
         }
         else if (i == 1000) {
-            cfr.printRegretSum("Vanilla_Cfr_1000_RegretSum");
-            cfr.printStrategySum("Vanilla_Cfr_1000_StrategySum");
+            cfr.printRegretSum("RunData/Vanilla_Cfr_1000_RegretSum_WithFlopBucket");
+            cfr.printStrategySum("RunData/Vanilla_Cfr_1000_StrategySum_WithFlopBucket");
         }
 
         if (_kbhit()) {
@@ -68,10 +69,10 @@ int main()
         }
     }
 
-    cfr.printRegretSum("Vanilla_Cfr_10000_RegretSum");
-    cfr.printStrategySum("Vanilla_Cfr_10000_StrategySum");*/
+    cfr.printRegretSum("RunData/Vanilla_Cfr_10000_RegretSum_WithFlopBucket");
+    cfr.printStrategySum("RunData/Vanilla_Cfr_10000_StrategySum_WithFlopBucket");
 
-    double battle_array[4][4];
+    /*double battle_array[4][4];
 
     VanillaCfr* cfr[4];
 
@@ -106,7 +107,9 @@ int main()
         }
 
         std::cout << "\n";
-    }
+    }*/
+
+    calculateFiveCardBucket(10);
     return 0;
 }
 

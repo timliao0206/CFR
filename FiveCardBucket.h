@@ -1,7 +1,10 @@
 #ifndef FIVE_CARD_BUCKET_H
 #define FIVE_CARD_BUCKET_H
 
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <fstream>
+
 
 using std::vector;
 
@@ -20,6 +23,6 @@ void calculateFiveCardBucket(uint8_t);
 
 uint8_t getFlopBucketByHandStrength(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t);
 
-uint8_t getFlopBucketByHandStrength(const uint8_t[7/*max board cards*/], uint8_t[10/*max player*/][3/*max hole cards*/], int);
+uint8_t getFlopBucketByHandStrength(const int8_t[7/*max board cards*/],const int8_t[10/*max player*/][3/*max hole cards*/], const int);
 
 #endif

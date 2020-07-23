@@ -143,8 +143,7 @@ void CFR::readFile(std::string fileName) {
 	file.getline(buffer, sizeof(buffer));
 	if (!strncmp(buffer, "data = regret_sum", 17)) {
 
-		//TMP
-		/*file.read(buffer, 6);
+		file.read(buffer, 6);
 		if (!strncmp(buffer, "size =", 6)) {
 			for (int i = 0; i < game->numRounds; i++) {
 				long size;
@@ -152,7 +151,7 @@ void CFR::readFile(std::string fileName) {
 				stored[i]->resizeRegretSum(size);
 			}
 		}
-		file.getline(buffer, sizeof(buffer));*/
+		file.getline(buffer, sizeof(buffer));
 		int round = -1;
 		while (file.getline(buffer, sizeof(buffer))) {
 			if (!strncmp(buffer, "START OF ROUND", 14)) {
