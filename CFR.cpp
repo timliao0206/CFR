@@ -7,6 +7,8 @@
 #include <stack>
 #include <time.h>
 #include <chrono>
+#include <conio.h>
+#include <iomanip>
 #include "CFR_family.h"
 #include "evalHandTable.h"
 #include <ctime>
@@ -28,57 +30,82 @@ int main()
 
     const BettingNode* root = initBettingTree(state, game, abs, num_entries_per_bucket);
 
-    /*int num_bucket[4] = { 10,10,10,10 };
+    int num_bucket[4] = { 10,10,10,10 };
     const CardAbstraction* card_abs = new EHS_Bucketing(num_bucket);
 
-    ES::go_through = 0;
-
-    VanillaCfr cfr(game, num_entries_per_bucket, card_abs);
-
-    */
-
-    const RealProbBucketing_train* RPB = new RealProbBucketing_train();
-
-    VanillaCfr_RPB cfr(game, RPB, num_entries_per_bucket);
-
-    cfr.readFile("RPB_RegretSum.txt");
-    cfr.readFile("RPB_StrategySum.txt");
-
-    std::fstream writeFile;
-    writeFile.open("Exploitability_Vanilla_RPB.txt", std::ios::out);
-
-    if (!writeFile) {
-        std::cout << "Can't open file." << std::endl;
-        return 0;
-    }
-
-    std::cout << "Successfully open the file." << std::endl;
-
-    auto curr_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-
-    writeFile << "Current Time : " << std::ctime(&curr_time) << "\n";
-    writeFile << "RPB + vanilla cfr , get exploitability by average strategy";
+    /*VanillaCfr cfr(game, num_entries_per_bucket, card_abs);
 
     const int printFreq = 1;
 
-    for (int i = 0; i < 100; i++) {
-        //int start = time(0);
+    int start_time = time(0);
 
-        cfr.doIteration(root, printFreq);
+    for (int i = 0; i < 10000; i++) {
+        cfr.doIteration(root,1);
 
-        //int end = time(0);
+        if (i == 10) {
+            cfr.printRegretSum("Vanilla_Cfr_10_RegretSum");
+            cfr.printStrategySum("Vanilla_Cfr_10_StrategySum");
+        }
+        else if (i == 100) {
+            cfr.printRegretSum("Vanilla_Cfr_100_RegretSum");
+            cfr.printStrategySum("Vanilla_Cfr_100_StrategySum");
+        }
+        else if (i == 1000) {
+            cfr.printRegretSum("Vanilla_Cfr_1000_RegretSum");
+            cfr.printStrategySum("Vanilla_Cfr_1000_StrategySum");
+        }
 
-        //writeFile << (i + 1) * printFreq << "   " << cfr.getExploitability(root) << "\n";
+        if (_kbhit()) {
+            char input = _getch();
+            if (input == 'a') {
+                int curr_time = time(0);
+                long spent = curr_time - start_time;
+                long expect_time = (10000 - i) * spent / i;
 
-        std::cout << (i + 1) * printFreq << "th iteration complete.\n";
+                std::cout << std::fixed << std::setprecision(2) << (double)i / 100 << "% complete.\n";
+                std::cout << "(expected)will end in " << expect_time / 3600 << " hours " << (expect_time % 3600) / 60 << " minutes and " << expect_time % 60 << " second.\n";
+            }
+        }
+    }
 
-        std::string fileName = "RPB_RegretSum.txt";
-        std::string file_strategy = "RPB_StrategySum.txt";
+    cfr.printRegretSum("Vanilla_Cfr_10000_RegretSum");
+    cfr.printStrategySum("Vanilla_Cfr_10000_StrategySum");*/
 
-        cfr.printRegretSum(fileName);
-        cfr.printStrategySum(file_strategy);
+    double battle_array[4][4];
 
-        break;
+    VanillaCfr* cfr[4];
+
+    for (int i = 0; i < 4; i++) {
+        cfr[i] = new VanillaCfr(game, num_entries_per_bucket, card_abs);
+    }
+
+    cfr[0]->readFile("Vanilla_Cfr_10_RegretSum");
+    cfr[0]->readFile("Vanilla_Cfr_10_StrategySum");
+    cfr[1]->readFile("Vanilla_Cfr_100_RegretSum");
+    cfr[1]->readFile("Vanilla_Cfr_100_StrategySum");
+    cfr[2]->readFile("Vanilla_Cfr_1000_RegretSum");
+    cfr[2]->readFile("Vanilla_Cfr_1000_StrategySum");
+    cfr[3]->readFile("Vanilla_Cfr_10000_RegretSum");
+    cfr[3]->readFile("Vanilla_Cfr_10000_StrategySum");
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            battle_array[i][j] = 0;
+        }
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = i + 1; j < 4; j++) {
+            battle_array[i][j] = battle(game, root, cfr[i], cfr[j], 1000);
+        }
+    }
+
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            std::cout << battle_array[i][j] << " ";
+        }
+
+        std::cout << "\n";
     }
     return 0;
 }

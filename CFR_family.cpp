@@ -81,6 +81,11 @@ void CFR::printRegretSum(std::string fileName) const{
 
 	file << "method = " + methodName() + "\n";
 	file << "data = regret_sum\n";
+	file << "size = ";
+	for (int i = 0; i < game->numRounds; i++) {
+		file << stored[i]->getRegretSumSize() << " ";
+	}
+	file << "\n";
 
 	for (int i = 0; i < game->numRounds; i++) {
 		file << "START OF ROUND " << i << "\n";
@@ -137,7 +142,9 @@ void CFR::readFile(std::string fileName) {
 
 	file.getline(buffer, sizeof(buffer));
 	if (!strncmp(buffer, "data = regret_sum", 17)) {
-		file.read(buffer, 6);
+
+		//TMP
+		/*file.read(buffer, 6);
 		if (!strncmp(buffer, "size =", 6)) {
 			for (int i = 0; i < game->numRounds; i++) {
 				long size;
@@ -145,7 +152,7 @@ void CFR::readFile(std::string fileName) {
 				stored[i]->resizeRegretSum(size);
 			}
 		}
-		file.getline(buffer, sizeof(buffer));
+		file.getline(buffer, sizeof(buffer));*/
 		int round = -1;
 		while (file.getline(buffer, sizeof(buffer))) {
 			if (!strncmp(buffer, "START OF ROUND", 14)) {
@@ -283,6 +290,8 @@ double VanillaCfr::walkTree(const int position, const BettingNode* cur_node, con
 
 		this->updateRegret(cur_node, hand, position, regret);
 	}
+
+	this->updateStrategySum(cur_node, hand, position, strategy);
 
 	return return_value;
 }
@@ -730,9 +739,9 @@ double battle(const Game* game, const BettingNode* root, const CFR* p1, const CF
 
 		while (current ->getChild() != nullptr){
 			if (current->getPlayer())
-				current->doAction(p2->sampleAction(current, hand, 1));
+				current = current->doAction(p2->sampleAction(current, hand, 1));
 			else
-				current->doAction(p1->sampleAction(current, hand, 0));
+				current = current->doAction(p1->sampleAction(current, hand, 0));
 		}
 
 		sum += current->evaluate(hand, 0) / round;
@@ -744,9 +753,9 @@ double battle(const Game* game, const BettingNode* root, const CFR* p1, const CF
 
 		while (current->getChild() != nullptr) {
 			if (!current->getPlayer())
-				current->doAction(p2->sampleAction(current, hand, 1));
+				current = current->doAction(p2->sampleAction(current, hand, 1));
 			else
-				current->doAction(p1->sampleAction(current, hand, 0));
+				current = current->doAction(p1->sampleAction(current, hand, 0));
 		}
 
 		sum += current->evaluate(hand, 1) / round;
