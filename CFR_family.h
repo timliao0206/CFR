@@ -43,6 +43,30 @@ protected:
 	const CardAbstraction* card_abs;
 };
 
+class RandomPlayer :public CFR {
+public:
+
+	RandomPlayer(const Game* game, const CardAbstraction* card_abs);
+
+	virtual void doIteration(const BettingNode* root) { assert(0); };
+	virtual void doIteration(const BettingNode* root, const int times) { assert(0); };
+	virtual double getExploitability(const BettingNode* root) const { assert(0); return 0; };
+
+	virtual int getStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const;
+	virtual int getAverageStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const;
+	virtual void updateRegret(const BettingNode* node, const Hand hand, const int position, std::vector<double> regret) { return; };
+	virtual void updateStrategySum(const BettingNode* node, const Hand hand, const int position, std::vector<double> strategy) { return; };
+	virtual int sampleAction(const BettingNode* node, const Hand hand, const int position) const;
+
+	virtual void printRegretSum(std::string fileName) const { assert(0); };
+	virtual void printStrategySum(std::string fileName) const { assert(0); };
+
+	virtual void readFile(std::string fileName) { return; };
+
+protected:
+	virtual std::string methodName() const { return "RANDOM_PLAYER"; };
+};
+
 class VanillaCfr : public CFR{
 public:
 

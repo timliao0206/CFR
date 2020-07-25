@@ -5,6 +5,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <random>
 
 using namespace std::chrono;
 
@@ -202,6 +203,42 @@ void CFR::readFile(std::string fileName) {
 		std::cout << "Invalid File : undefine data type\n";
 		return;
 	}
+}
+
+RandomPlayer::RandomPlayer(const Game* new_game, const CardAbstraction* new_card_abs){
+	game = new_game;
+	card_abs = new_card_abs;
+	for (int j = 0; j < MAX_ROUNDS; j++) {
+		stored[j] = NULL;
+	}
+}
+
+int RandomPlayer::getStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const {
+	for (int i = 0; i < node->getNumAction(); i++) {
+		strategy[i] = 1.0 / node->getNumAction();
+	}
+	return 1;
+}
+
+int RandomPlayer::getAverageStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const {
+	for (int i = 0; i < node->getNumAction(); i++) {
+		strategy[i] = 1.0 / node->getNumAction();
+	}
+	return 1;
+}
+
+int RandomPlayer::sampleAction(const BettingNode* node, const Hand hand, const int position) const {
+	double ran = (double)rand() / (double)(RAND_MAX + 1.0);
+	int i = 0;
+	int numAction = node->getNumAction();
+	while (ran >= 0) {
+		ran -= 1.0 / numAction;
+		i++;
+	}
+	i--;
+	assert(i >= 0);
+	assert(i < numAction);
+	return i;
 }
 
 VanillaCfr::VanillaCfr(const Game* new_game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs) {
