@@ -96,7 +96,7 @@ private:
 class VanillaCfr_RPB : public CFR{
 public:
 
-	VanillaCfr_RPB(const Game* game, const RealProbBucketing_train* RPB, size_t num_entries_per_bucket[MAX_ROUNDS]);
+	VanillaCfr_RPB(const Game* game, size_t num_entries_per_bucket[MAX_ROUNDS],const RealProbBucketing_train* RPB);
 
 	virtual void doIteration(const BettingNode* root, const int times);
 	virtual void doIteration(const BettingNode* root);
@@ -110,19 +110,20 @@ public:
 	void updateRegret(const BettingNode* node, const Hand hand, const int position, std::vector<double> regret);
 	void updateStrategySum(const BettingNode* node,  const Hand hand, const int position,std::vector<double> strategy);
 
+	virtual const RealProbBucketing_train* getCardAbstraction() const{ return RPB; }
 protected:
 	virtual std::string methodName() const{ return "VANILLA_CFR_RPB"; }
-
-private:
 	const RealProbBucketing_train* RPB;
+private:
+	
 
 	double computeExploitability(const BettingNode* node, const Hand hand, const int position) const;
 };
 
-class ES : public CFR{
+class ES : public CFR {
 public:
 
-	ES(const Game* game , size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs);
+	ES(const Game* game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs);
 	~ES();
 
 	virtual void doIteration(const BettingNode* root);
@@ -130,6 +131,8 @@ public:
 	double walkTree(const int position, const BettingNode* cur_node, const Hand hand);
 
 	virtual double getExploitability(const BettingNode* root) const;
+
+	virtual int sampleAction(const BettingNode* node, const Hand hand, const int position)const;
 
 	static int go_through;
 
@@ -141,6 +144,23 @@ private:
 
 };
 
+class OS : public CFR {
+
+	OS(const Game* game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs);
+	virtual void doIteration(const BettingNode* root);
+	virtual void doIteration(const BettingNode* root, const int time);
+	double walkTree(const int position, const BettingNode* cur_node, const Hand hand, double prob);
+
+	virtual double getExploitability(const BettingNode* root) const { assert(0); return 0; /*TO-DO*/}
+
+protected:
+	virtual std::string methodName() const { return "OS"; }
+
+private:
+	double computeExploitability(const BettingNode* node, const Hand hand, const int position)const { assert(0); return 0; /*TO-DO*/ };
+};
+
 double battle(const Game* game, const BettingNode* root, const CFR* p1, const CFR* p2, const int round);
+double battle(const Game* game, const BettingNode* root, const VanillaCfr_RPB* p1, const VanillaCfr_RPB* p2, const int round);
 
 #endif // !CFR_FAMILY_H

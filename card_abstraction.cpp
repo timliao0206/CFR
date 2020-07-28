@@ -301,7 +301,7 @@ RealProbBucketing_train::RealProbBucketing_train(){}
 
 RealProbBucketing_train::~RealProbBucketing_train(){}
 
-void RealProbBucketing_train::precomputeBucket(Hand& hand, int prob[MAX_PLAYERS]) const{
+void RealProbBucketing_train::precomputeBuckets(Hand& hand, int prob[MAX_PLAYERS]) const{
 
 	for (int round = 0; round < MAX_ROUNDS; round++) {
 		for (int player = 0; player < MAX_PLAYERS; player++) {

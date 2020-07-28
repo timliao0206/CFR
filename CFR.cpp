@@ -21,7 +21,7 @@ int main()
 
     const Game* game = readGame(file);
     srand(0);
-    calculateFiveCardBucket(10);
+    //calculateFiveCardBucket(10);
 
     State state;
     initState(game, 0 , &state);
@@ -34,27 +34,34 @@ int main()
 
     int num_bucket[4] = { 10,10,10,10 };
     const CardAbstraction* card_abs = new EHS_Bucketing(num_bucket);
+    calculateFiveCardBucket(10);
 
-    /*ES cfr(game, num_entries_per_bucket, card_abs);
+    
 
-    const int printFreq = 1;
+    
+    
+
+    //RealProbBucketing_train* RPB = new RealProbBucketing_train();
+    VanillaCfr cfr(game, num_entries_per_bucket, card_abs);
+
+    const int iteration = 100000;
 
     int start_time = time(0);
 
-    for (int i = 0; i < 1000000; i++) {
+    for (int i = 0; i < iteration; i++) {
         cfr.doIteration(root,1);
 
-        if (i == 1000) {
-            cfr.printRegretSum("RunData/ES_1000_RegretSum_WithFlopBucket");
-            cfr.printStrategySum("RunData/ES_1000_StrategySum_WithFlopBucket");
+        if (i == iteration/1000) {
+            cfr.printRegretSum("RunData/Vanilla_Cfr_100_RegretSum_fixed_version");
+            cfr.printStrategySum("RunData/Vanilla_Cfr_100_StrategySum_fixed_version");
         }
-        else if (i == 10000) {
-            cfr.printRegretSum("RunData/ES_10000_RegretSum_WithFlopBucket");
-            cfr.printStrategySum("RunData/ES_10000_StrategySum_WithFlopBucket");
+        else if (i == iteration/100) {
+            cfr.printRegretSum("RunData/Vanilla_Cfr_1000_RegretSum_fixed_version");
+            cfr.printStrategySum("RunData/Vanilla_Cfr_1000_StrategySum_fixed_version");
         }
-        else if (i == 100000) {
-            cfr.printRegretSum("RunData/ES_100000_RegretSum_WithFlopBucket");
-            cfr.printStrategySum("RunData/ES_100000_StrategySum_WithFlopBucket");
+        else if (i == iteration/10) {
+            cfr.printRegretSum("RunData/Vanilla_Cfr_10000_RegretSum_fixed_version");
+            cfr.printStrategySum("RunData/Vanilla_Cfr_10000_StrategySum_fixed_version");
         }
 
         if (_kbhit()) {
@@ -66,22 +73,26 @@ int main()
                     std::cout << "0 % complete\ntime spent is uncertain.\n";
                 }
                 else {
-                    long expect_time = (1000000 - i) * spent / i;
+                    long expect_time = (iteration - i) * spent / i;
 
-                    std::cout << std::fixed << std::setprecision(2) << (double)i / 10000 << "% complete.\n";
+                    std::cout << std::fixed << std::setprecision(2) << (double)i*100 / iteration << "% complete.\n";
                     std::cout << "(expected)will end in " << expect_time / 3600 << " hours " << (expect_time % 3600) / 60 << " minutes and " << expect_time % 60 << " second.\n";
                 }
             }
         }
     }
 
-    cfr.printRegretSum("RunData/ES_1000000_RegretSum_WithFlopBucket");
-    cfr.printStrategySum("RunData/ES_1000000_StrategySum_WithFlopBucket");*/
+    cfr.printRegretSum("RunData/Vanilla_Cfr_100000_RegretSum_fixed_version");
+    cfr.printStrategySum("RunData/Vanilla_Cfr_100000_StrategySum_fixed_version");
 
-    double battle_array[4][4];
+    
 
-    ES* cfr[4];
+    /*for (int i = 0; i < 4; i++) {
+        cfr[i] = new VanillaCfr_RPB(game, num_entries_per_bucket, RPB);
+    }*/
 
+
+    /*ES* cfr[4];
     VanillaCfr* van[4];
 
     RandomPlayer* random_player = new RandomPlayer(game,card_abs);
@@ -91,14 +102,14 @@ int main()
         van[i] = new VanillaCfr(game, num_entries_per_bucket, card_abs);
     }
 
-    cfr[0]->readFile("RunData/ES_1000_RegretSum_WithFlopBucket");
-    cfr[0]->readFile("RunData/ES_1000_StrategySum_WithFlopBucket");
-    cfr[1]->readFile("RunData/ES_10000_RegretSum_WithFlopBucket");
-    cfr[1]->readFile("RunData/ES_10000_StrategySum_WithFlopBucket");
-    cfr[2]->readFile("RunData/ES_100000_RegretSum_WithFlopBucket");
-    cfr[2]->readFile("RunData/ES_100000_StrategySum_WithFlopBucket");
-    cfr[3]->readFile("RunData/ES_1000000_RegretSum_WithFlopBucket");
-    cfr[3]->readFile("RunData/ES_1000000_StrategySum_WithFlopBucket");
+    cfr[0]->readFile("RunData/ES_1000_RegretSum");
+    cfr[0]->readFile("RunData/ES_1000_StrategySum");
+    cfr[1]->readFile("RunData/ES_10000_RegretSum");
+    cfr[1]->readFile("RunData/ES_10000_StrategySum");
+    cfr[2]->readFile("RunData/ES_100000_RegretSum");
+    cfr[2]->readFile("RunData/ES_100000_StrategySum");
+    cfr[3]->readFile("RunData/ES_1000000_RegretSum");
+    cfr[3]->readFile("RunData/ES_1000000_StrategySum");
 
     van[0]->readFile("RunData/Vanilla_Cfr_10_RegretSum_WithFlopBucket");
     van[0]->readFile("RunData/Vanilla_Cfr_10_StrategySum_WithFlopBucket");
@@ -112,20 +123,28 @@ int main()
     for (int i = 0; i < 4; i++) {
         std::cout << "Vanilla Cfr with 10^" << i + 1 << " iteration:\n";
         for (int j = 0; j < 4; j++) {
-            std::cout << "ES with 10^" << j + 3 << " iteration " << battle(game, root, van[i], cfr[j], 1000) << "\n";
+            std::cout << "ES with 10^" << j + 3 << " iteration " << battle(game, root, van[i], cfr[j], 10000) << "\n";
         }
         std::cout << "\n";
     }
 
-    /*
-    std::cout << "10^3 vs 10^4" << battle(game, root, cfr[0], cfr[1], 1000) << "\n";
-    std::cout << "10^3 vs 10^5" << battle(game, root, cfr[0], cfr[2], 1000) << "\n";
-    std::cout << "10^3 vs 10^6" << battle(game, root, cfr[0], cfr[3], 1000) << "\n";
+    for (int i = 0; i < 4; i++) {
+        std::cout << "Vanilla Cfr with 10^" << i + 1 << "iteration vs Random : " << battle(game, root, van[i], random_player, 10000) << "\n";
+    }
+
+    for (int i = 0; i < 4; i++) {
+        std::cout << "ES with 10^" << i + 3 << "iteration vs Random : " << battle(game, root, cfr[i], random_player, 10000) << "\n";
+    }*/
+
+    
+    /*std::cout << "1 vs 10 " << battle(game, root, cfr[0], cfr[1], 1000) << "\n";
+    std::cout << "1 vs 100 " << battle(game, root, cfr[0], cfr[2], 1000) << "\n";
+    std::cout << "1 vs 1000 " << battle(game, root, cfr[0], cfr[3], 1000) << "\n";
     std::cout << "\n";
-    std::cout << "10^4 vs 10^5" << battle(game, root, cfr[1], cfr[2], 1000) << "\n";
-    std::cout << "10^4 vs 10^6" << battle(game, root, cfr[1], cfr[3], 1000) << "\n";
+    std::cout << "10 vs 100 " << battle(game, root, cfr[1], cfr[2], 1000) << "\n";
+    std::cout << "10 vs 1000 " << battle(game, root, cfr[1], cfr[3], 1000) << "\n";
     std::cout << "\n";
-    std::cout << "10^5 vs 10^6" << battle(game, root, cfr[2], cfr[3], 1000) << "\n";*/
+    std::cout << "100 vs 1000 " << battle(game, root, cfr[2], cfr[3], 1000) << "\n";*/
     return 0;
 }
 

@@ -25,6 +25,7 @@ public:
 	void updateRegret(const int64_t index, const int bucket, std::vector<double> regret);
 	void updateStrategySum(const int64_t index, const int bucket, std::vector<double> strategy);
 	int sampleAction(const int64_t index, const int bucket, const int num_action);
+	int sampleActionbyAverageStrategy(const int64_t index, const int bucket, const int num_action);
 	long getRegretSumSize();
 	long getStrategySumSize();
 	void resizeRegretSum(long size);

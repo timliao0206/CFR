@@ -64,12 +64,14 @@ int CFR::sampleAction(const BettingNode* node, const Hand hand, const int positi
 	int64_t index = node->getIndex();
 	int bucket = 0;
 
-	if (card_abs->canPrecomputeBuckets())
+	if (card_abs->canPrecomputeBuckets()) {
 		bucket = hand.precomputed_bucket[position][node->getRound()];
-	else
+	}
+	else {
 		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
+	}
 
-	return stored[node->getRound()]->sampleAction(index, bucket, node->getNumAction());
+	return stored[node->getRound()]->sampleActionbyAverageStrategy(index, bucket, node->getNumAction());
 }
 
 void CFR::printRegretSum(std::string fileName) const{
@@ -303,7 +305,7 @@ double VanillaCfr::walkTree(const int position, const BettingNode* cur_node, con
 	std::vector<double> strategy(num_choices);
 	std::vector<double> regret(num_choices);
 
-	this->getStrategy(cur_node, hand, position, strategy);
+	this->getStrategy(cur_node, hand, player, strategy);
 
 	double return_value = 0;
 
@@ -424,7 +426,7 @@ void VanillaCfr_RPB::doIteration(const BettingNode* root, const int times) {
 				prob[1] = p2;
 
 				Hand hand = generateEmptyHand();
-				RPB->precomputeBucket(hand, prob);
+				RPB->precomputeBuckets(hand, prob);
 
 				for (int player = 0; player < game->numPlayers; player++) {
 					walkTree(player, root, hand, 1.0, 1.0);
@@ -443,7 +445,7 @@ double VanillaCfr_RPB::getExploitability(const BettingNode* root)const {
 			prob[1] = p2;
 
 			Hand hand = generateEmptyHand();
-			RPB->precomputeBucket(hand, prob);
+			RPB->precomputeBuckets(hand, prob);
 
 			for (int player = 0; player < game->numPlayers; player++) {
 				sum += computeExploitability(root, hand, player) / 242;
@@ -507,7 +509,7 @@ double VanillaCfr_RPB::computeExploitability(const BettingNode* node, const Hand
 	}
 }
 
-VanillaCfr_RPB::VanillaCfr_RPB(const Game* new_game, const RealProbBucketing_train* new_RPB, size_t num_entries_per_bucket[MAX_ROUNDS]) {
+VanillaCfr_RPB::VanillaCfr_RPB(const Game* new_game, size_t num_entries_per_bucket[MAX_ROUNDS], const RealProbBucketing_train* new_RPB) {
 	for (int j = 0; j < MAX_ROUNDS; j++) {
 		if (j >= new_game->numRounds) {
 			stored[j] = NULL;
@@ -518,7 +520,7 @@ VanillaCfr_RPB::VanillaCfr_RPB(const Game* new_game, const RealProbBucketing_tra
 	}
 
 	RPB = new_RPB;
-	card_abs = NULL;
+	card_abs = new_RPB;
 	game = new_game;
 }
 
@@ -705,6 +707,7 @@ double ES::walkTree(const int position, const BettingNode* cur_node, const Hand 
 	}
 
 	updateRegret(cur_node, hand,position,regret);
+	updateStrategySum(cur_node, hand, position, strategy);
 
 	return return_value;
 }
@@ -763,13 +766,90 @@ double ES::getExploitability(const BettingNode* root) const {
 	return sum;
 }
 
+int ES::sampleAction(const BettingNode* node, const Hand hand, const int position) const {
+
+	int64_t index = node->getIndex();
+	int bucket = 0;
+
+	if (card_abs->canPrecomputeBuckets())
+		bucket = hand.precomputed_bucket[position][node->getRound()];
+	else
+		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
+
+	return stored[node->getRound()]->sampleAction(index, bucket, node->getNumAction());
+}
+
+OS::OS(const Game* new_game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs) {
+
+	for (int j = 0; j < MAX_ROUNDS; j++) {
+		if (j >= new_game->numRounds) {
+			stored[j] = NULL;
+		}
+		else {
+			stored[j] = new Storage(num_entries_per_bucket[j]);
+		}
+	}
+
+	card_abs = abs;
+	game = new_game;
+}
+
+double OS::walkTree(const int position, const BettingNode* cur_node, const Hand hand, double prob) {
+	if (cur_node->getChild() == NULL) {
+		return cur_node->evaluate(hand, position);
+	}
+
+	if (cur_node->getPlayer() != position) {
+		int action = sampleAction(cur_node, hand, cur_node->getPlayer());
+		walkTree(position, cur_node->doAction(action), hand, prob);
+	}
+
+	std::vector<double> strategy(cur_node->getNumAction());
+	getStrategy(cur_node, hand, cur_node->getPlayer(), strategy);
+
+	int action = sampleAction(cur_node, hand, cur_node->getPlayer());
+	double value = walkTree(position, cur_node->doAction(action), hand, prob * strategy[action]);
+
+	std::vector<double> regret(cur_node->getNumAction());
+
+	double omega = value / (prob * strategy[action]);
+
+	for (int i = 0; i < cur_node->getNumAction(); i++) {
+		if (i == action) {
+			regret[i] = (1 - strategy[i]) * omega;
+		}
+		else {
+			regret[i] = -strategy[i] * omega;
+		}
+	}
+
+	updateRegret(cur_node, hand, position, regret);
+
+	return value;
+}
+
+void OS::doIteration(const BettingNode* root) {
+	Hand hand = generateHand(game);
+	card_abs->precomputeBuckets(game, hand);
+
+	for (int i = 0; i < 2; i++) {
+		walkTree(i, root, hand, 1.0);
+	}
+}
+
+void OS::doIteration(const BettingNode* root, const int times) {
+	for (int i = 0; i < times; i++) {
+		doIteration(root);
+	}
+}
+
 double battle(const Game* game, const BettingNode* root, const CFR* p1, const CFR* p2, const int round) {
 	double sum = 0;
 
 	for (int i = 0; i < round; i++) {
 		Hand hand = generateHand(game);
 		p1->getCardAbstraction()->precomputeBuckets(game, hand,0);
-		p2->getCardAbstraction()->precomputeBuckets(game, hand, 1);
+		p2->getCardAbstraction()->precomputeBuckets(game, hand,1);
 
 		const BettingNode* current = root;
 
@@ -789,12 +869,41 @@ double battle(const Game* game, const BettingNode* root, const CFR* p1, const CF
 
 		while (current->getChild() != nullptr) {
 			if (!current->getPlayer())
-				current = current->doAction(p2->sampleAction(current, hand, 1));
+				current = current->doAction(p2->sampleAction(current, hand, 0));
 			else
-				current = current->doAction(p1->sampleAction(current, hand, 0));
+				current = current->doAction(p1->sampleAction(current, hand, 1));
 		}
 
 		sum += current->evaluate(hand, 1) / round;
+	}
+
+	return sum;
+}
+
+double battle(const Game* game, const BettingNode* root, const VanillaCfr_RPB* p1, const VanillaCfr_RPB* p2, const int round) {
+	int bucket[2];
+	double sum = 0;
+	for (int i = 0; i < round; i++) {
+		for (int rank1 = 0; rank1 <= 10; rank1++) {
+			bucket[0] = rank1;
+			for (int rank2 = 0; rank2 <= 10; rank2++) {
+				Hand hand = generateEmptyHand();
+				bucket[1] = rank2;
+
+				p1->getCardAbstraction()->precomputeBuckets(hand, bucket);
+
+				const BettingNode* current = root;
+
+				while (current->getChild() != nullptr) {
+					if (current->getPlayer())
+						current = current->doAction(p2->sampleAction(current, hand, 1));
+					else
+						current = current->doAction(p1->sampleAction(current, hand, 0));
+				}
+
+				sum += current->evaluate(hand, 0) / (round*11*2);
+			}
+		}
 	}
 
 	return sum;

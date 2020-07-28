@@ -166,6 +166,43 @@ int Storage::sampleAction(const int64_t index, const int bucket, const int num_a
 
 	return sampled;
 }
+int Storage::sampleActionbyAverageStrategy(const int64_t index, const int bucket, const int num_action) {
+	int64_t localIndex = getLocalIndex(index, bucket);
+
+	std::vector<double> strategy(num_action);
+	int status = getAverageStrategy(index, bucket, num_action, strategy);
+
+	double ran = (double)rand() / (double)(RAND_MAX + 1.0);
+
+	if (status == -1) {
+		int sampled = 0;
+		while (ran >= 0) {
+			ran -= 1.0 / (double)num_action;
+			sampled++;
+
+			assert(sampled <= num_action);
+		}
+		sampled--;
+
+		return sampled;
+	}
+
+	double sum = 0;
+	for (int i = 0; i < num_action; i++) {
+		sum += strategy[i];
+	}
+
+	int sampled = 0;
+	while (ran > 0) {
+		assert(sampled < num_action);
+
+		ran -= strategy[sampled] / sum;
+		sampled++;
+	}
+	sampled--;
+
+	return sampled;
+}
 
 void Storage::printRegretSum(std::string fileName) {
 
