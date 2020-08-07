@@ -3,7 +3,20 @@
 
 using std::vector;
 
+uint8_t cur_num_bucket = -1;
+
 vector< vector< vector< vector< vector<uint8_t> > > > > all_bucket;
+
+bool exist_file(const std::string& name) {
+	FILE* file;
+	errno_t err;
+	if (err = fopen_s(&file, name.c_str(), "r")) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
 
 bool compare_strength(const hand_cards one, const hand_cards two)
 {
@@ -13,6 +26,7 @@ bool compare_strength(const hand_cards one, const hand_cards two)
 void calculateFiveCardBucket(uint8_t num_buckets)
 {
 	const int tem = 52;
+	cur_num_bucket = num_buckets;
 	std::fstream  file;
 	file.open("FiveCardHandStrength.txt", std::ios::in);
 	all_bucket.clear();
@@ -49,7 +63,8 @@ void calculateFiveCardBucket(uint8_t num_buckets)
 	file.close();
 	// std::cout << all2[41][43][36][40][50] << std::endl;
 	std::fstream  file2;
-	file2.open("FiveCardBuckets.txt", std::ios::out);
+	std::string file2_name = "FiveCardBuckets_" + std::to_string(num_buckets) + ".txt";
+	file2.open(file2_name, std::ios::out);
 	std::string for_output;
 	vector<hand_cards> for_sort;
 	for (uint8_t b1 = 0; b1 < 52; ++b1)
@@ -117,7 +132,7 @@ void calculateFiveCardBucket(uint8_t num_buckets)
 	all2.clear();
 	all2.shrink_to_fit();
 	all_bucket.assign(tem, vector< vector< vector< vector<uint8_t> > > >(tem, vector< vector< vector<uint8_t> > >(tem, vector< vector<uint8_t> >(tem, vector<uint8_t>(tem, UINT8_MAX)))));
-	file2.open("FiveCardBuckets.txt", std::ios::in);
+	file2.open(file2_name, std::ios::in);
 	uint16_t uint8_t_buffer;
 	for (uint8_t b1 = 0; b1 < 52; ++b1)
 	{
@@ -147,18 +162,104 @@ void calculateFiveCardBucket(uint8_t num_buckets)
 	file2.close();
 }
 
-uint8_t getFlopBucketByHandStrength(uint8_t first_hand_card, uint8_t second_hand_card, uint8_t first_board_card, uint8_t second_board_card, uint8_t third_board_card)
+uint8_t getFlopBucketByHandStrength(uint8_t first_hand_card, uint8_t second_hand_card, uint8_t first_board_card, uint8_t second_board_card, uint8_t third_board_card, uint8_t num_bucket)
 {
-	return all_bucket[first_hand_card][second_hand_card][first_board_card][second_board_card][third_board_card];
+	bool doesnt_have_bucket_flag = 0;
+	if (cur_num_bucket == num_bucket)
+	{
+		if (all_bucket.size() == 52)
+		{
+			if (all_bucket[0].size() == 52)
+			{
+				if (all_bucket[0][0].size() == 52)
+				{
+					if (all_bucket[0][0][0].size() == 52)
+					{
+						if (all_bucket[0][0][0][0].size() == 52)
+						{
+							return all_bucket[first_hand_card][second_hand_card][first_board_card][second_board_card][third_board_card];
+						}
+						else
+							doesnt_have_bucket_flag = 1;
+					}
+					else
+						doesnt_have_bucket_flag = 1;
+				}
+				else
+					doesnt_have_bucket_flag = 1;
+			}
+			else
+				doesnt_have_bucket_flag = 1;
+		}
+		else
+			doesnt_have_bucket_flag = 1;
+	}
+	else
+		doesnt_have_bucket_flag = 1;
+
+	if (doesnt_have_bucket_flag)
+	{
+		std::string bucket_file_name = "FiveCardBuckets_" + std::to_string(num_bucket) + ".txt";
+		if (exist_file(bucket_file_name))
+		{
+			std::fstream  bucket_file;
+			const int tem = 52;
+			all_bucket.assign(tem, vector< vector< vector< vector<uint8_t> > > >(tem, vector< vector< vector<uint8_t> > >(tem, vector< vector<uint8_t> >(tem, vector<uint8_t>(tem, UINT8_MAX)))));
+			bucket_file.open(bucket_file_name, std::ios::in);
+			uint16_t uint8_t_buffer;
+			for (uint8_t b1 = 0; b1 < 52; ++b1)
+			{
+				for (uint8_t b2 = b1 + 1; b2 < 52; ++b2)
+				{
+					for (uint8_t b3 = b2 + 1; b3 < 52; ++b3)
+					{
+						for (uint8_t h1 = 0; h1 < 52; ++h1)
+						{
+							while (h1 == b1 || h1 == b2 || h1 == b3)
+								++h1;
+							if (h1 > 51)
+								break;
+							for (uint8_t h2 = h1 + 1; h2 < 52; ++h2)
+							{
+								while (h2 == b1 || h2 == b2 || h2 == b3)
+									++h2;
+								if (h2 > 51)
+									break;
+								bucket_file >> uint8_t_buffer;
+								all_bucket[h1][h2][b1][b2][b3] = (uint8_t)uint8_t_buffer;
+							}
+						}
+					}
+				}
+			}
+			bucket_file.close();
+			cur_num_bucket = num_bucket;
+			return all_bucket[first_hand_card][second_hand_card][first_board_card][second_board_card][third_board_card];
+		}
+		else
+		{
+			std::cout << "ERROR in FiveCardBucket.cpp getFlopBucketByHandStrength, please preprocess bucket first.\n";
+			return -1;
+		}
+	}
 }
 
+<<<<<<< HEAD
 uint8_t getFlopBucketByHandStrength(const int8_t board_cards[7/*max board cards*/],const int8_t hole_cards[10/*max player*/][3/*max hole cards*/],const int position)
+=======
+uint8_t getFlopBucketByHandStrength(const uint8_t board_cards[7/*max board cards*/], uint8_t hole_cards[10/*max player*/][3/*max hole cards*/], int position, uint8_t num_bucket)
+>>>>>>> 8413327a30289254a2e5389ad1263c9dbf7b0bba
 {
 	uint8_t for_sort[3];
 	for_sort[0] = board_cards[0];
 	for_sort[1] = board_cards[1];
 	for_sort[2] = board_cards[2];
 	std::sort(for_sort, for_sort + 3);
+<<<<<<< HEAD
 	return getFlopBucketByHandStrength((uint8_t)std::min(hole_cards[position][0], hole_cards[position][1]), 
 		(uint8_t)std::max(hole_cards[position][0], hole_cards[position][1]), for_sort[0], for_sort[1], for_sort[2]);
+=======
+	return getFlopBucketByHandStrength(std::min(hole_cards[position][0], hole_cards[position][1]), 
+		std::max(hole_cards[position][0], hole_cards[position][1]), for_sort[0], for_sort[1], for_sort[2], num_bucket);
+>>>>>>> 8413327a30289254a2e5389ad1263c9dbf7b0bba
 }
