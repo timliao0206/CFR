@@ -33,6 +33,10 @@ public:
 
 protected:
 	BettingNode* sibling;
+
+public:
+
+	static int64_t size;
 	
 };
 
@@ -84,7 +88,8 @@ protected:
 BettingNode* initBettingTree(State& state,
 	const Game* game,
 	const ActionAbstraction* action_abstraction,
-	size_t num_entries_per_bucket[MAX_ROUNDS]
+	size_t num_entries_per_bucket[MAX_ROUNDS],
+	int8_t raise_time
 );
 
 

@@ -71,7 +71,7 @@ int CFR::sampleAction(const BettingNode* node, const Hand hand, const int positi
 		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
 	}
 
-	return stored[node->getRound()]->sampleActionbyAverageStrategy(index, bucket, node->getNumAction());
+	return stored[node->getRound()]->sampleAction/*byAverageStrategy*/(index, bucket, node->getNumAction());
 }
 
 void CFR::printRegretSum(std::string fileName) const{
@@ -329,7 +329,7 @@ double VanillaCfr::walkTree(const int position, const BettingNode* cur_node, con
 		this->updateRegret(cur_node, hand, position, regret);
 	}
 
-	this->updateStrategySum(cur_node, hand, position, strategy);
+	this->updateStrategySum(cur_node, hand, player, strategy);
 
 	return return_value;
 }
@@ -766,7 +766,7 @@ double ES::getExploitability(const BettingNode* root) const {
 	return sum;
 }
 
-int ES::sampleAction(const BettingNode* node, const Hand hand, const int position) const {
+/*int ES::sampleAction(const BettingNode* node, const Hand hand, const int position) const {
 
 	int64_t index = node->getIndex();
 	int bucket = 0;
@@ -777,7 +777,7 @@ int ES::sampleAction(const BettingNode* node, const Hand hand, const int positio
 		bucket = card_abs->getBucket(game, node, hand.board_cards, hand.hole_cards, position);
 
 	return stored[node->getRound()]->sampleAction(index, bucket, node->getNumAction());
-}
+}*/
 
 OS::OS(const Game* new_game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs) {
 
@@ -816,7 +816,7 @@ double OS::walkTree(const int position, const BettingNode* cur_node, const Hand 
 
 	for (int i = 0; i < cur_node->getNumAction(); i++) {
 		if (i == action) {
-			regret[i] = (1 - strategy[i]) * omega;
+			regret[i] = (1.0 - strategy[i]) * omega;
 		}
 		else {
 			regret[i] = -strategy[i] * omega;

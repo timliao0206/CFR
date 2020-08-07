@@ -56,10 +56,15 @@ const BettingNode* InfoSet::doAction(const int action) const {
 	return cur;
 }
 
+int64_t BettingNode::size;
+
 BettingNode* initBettingTree(State& state,
 	const Game* game,
 	const ActionAbstraction* action_abstraction,
-	size_t num_entries_per_bucket[MAX_ROUNDS]) {
+	size_t num_entries_per_bucket[MAX_ROUNDS],
+	int8_t raise_time) {
+
+	BettingNode::size++;
 
 	if (state.finished) {//terminal node
 
@@ -93,11 +98,15 @@ BettingNode* initBettingTree(State& state,
 
 	BettingNode* first = NULL;
 	BettingNode* last = NULL;
+
 	for (int a = 0; a < num_action; a++) {
+
+		if (a >= 2 && raise_time >= action_abstraction->getMaxRound(state.round)) break;
+
 		State tmp_state(state);
 		doAction(game, &actions[a], &tmp_state);
 
-		BettingNode* child = initBettingTree(tmp_state, game, action_abstraction, num_entries_per_bucket);
+		BettingNode* child = initBettingTree(tmp_state, game, action_abstraction, num_entries_per_bucket,( a < 2 ? 0 : raise_time + 1));
 
 		if (first == NULL) {
 			first = child;

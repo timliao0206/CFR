@@ -132,7 +132,7 @@ public:
 
 	virtual double getExploitability(const BettingNode* root) const;
 
-	virtual int sampleAction(const BettingNode* node, const Hand hand, const int position)const;
+	//virtual int sampleAction(const BettingNode* node, const Hand hand, const int position)const;
 
 	static int go_through;
 
@@ -145,6 +145,7 @@ private:
 };
 
 class OS : public CFR {
+public:
 
 	OS(const Game* game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs);
 	virtual void doIteration(const BettingNode* root);
