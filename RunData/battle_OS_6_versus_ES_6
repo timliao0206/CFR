@@ -1,0 +1,24 @@
+OS with 10^3 iteration:
+ES with 10^3 iteration -22.71
+ES with 10^4 iteration -22.644
+ES with 10^5 iteration -19.218
+ES with 10^6 iteration -18.7015
+
+OS with 10^4 iteration:
+ES with 10^3 iteration -18.6175
+ES with 10^4 iteration -22.831
+ES with 10^5 iteration -17.356
+ES with 10^6 iteration -15.6305
+
+OS with 10^5 iteration:
+ES with 10^3 iteration -15.602
+ES with 10^4 iteration -20.278
+ES with 10^5 iteration -16.8025
+ES with 10^6 iteration -17.7445
+
+OS with 10^6 iteration:
+ES with 10^3 iteration -16.8265
+ES with 10^4 iteration -18.0015
+ES with 10^5 iteration -18.331
+ES with 10^6 iteration -17.136
+

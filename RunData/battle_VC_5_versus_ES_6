@@ -1,0 +1,24 @@
+Vanilla Cfr with 10^2 iteration:
+ES with 10^3 iteration -3.0025
+ES with 10^4 iteration -16.5075
+ES with 10^5 iteration -14.8725
+ES with 10^6 iteration -13.996
+
+Vanilla Cfr with 10^3 iteration:
+ES with 10^3 iteration 2.604
+ES with 10^4 iteration -6.689
+ES with 10^5 iteration -8.137
+ES with 10^6 iteration -8.567
+
+Vanilla Cfr with 10^4 iteration:
+ES with 10^3 iteration 9.6505
+ES with 10^4 iteration 0.6825
+ES with 10^5 iteration -0.711
+ES with 10^6 iteration -2.209
+
+Vanilla Cfr with 10^5 iteration:
+ES with 10^3 iteration 11.001
+ES with 10^4 iteration 2.4535
+ES with 10^5 iteration 0.796
+ES with 10^6 iteration 0.137
+
