@@ -3,6 +3,7 @@
 #define EVALHANDTABLE_H
 
 #include <inttypes.h>
+#include "const.h"
 
 typedef union {
 	uint16_t bySuit[4];
@@ -29,6 +30,7 @@ public:
 	static CardSet emptyCardset();
 	static void addCardToCardSet(CardSet* c, int suit, int rank);
 	static int rankTwoCards(const CardSet cards);
+	static int rankTwoCards(const int card1, const int card2);
 
 };
 #endif

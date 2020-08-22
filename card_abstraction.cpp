@@ -12,7 +12,7 @@ CardAbstraction::~CardAbstraction() {
 
 }
 
-const int EHS_Bucketing::index_to_card_one[1326] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
+const int EHS_Bucketing::index_to_card_two[1326] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
 4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
@@ -63,7 +63,7 @@ const int EHS_Bucketing::index_to_card_one[1326] = { 1,2,3,4,5,6,7,8,9,10,11,12,
 49,50,51,
 50,51,
 51};
-const int EHS_Bucketing::index_to_card_two[1326] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+const int EHS_Bucketing::index_to_card_one[1326] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
@@ -160,19 +160,13 @@ int EHS_Bucketing::getBucket(const Game* game, const BettingNode* node,
 int EHS_Bucketing::getBucket_preflop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], 
 	const int position) const {
 
-	CardSet card_set = eval::emptyCardset();
-
-	for (int j = 0; j < 2; j++) {
-		eval::addCardToCardSet(&card_set, hole_cards[position][j] / 13, hole_cards[position][j] % 13);
-	}
-
-	return  ((eval::rankTwoCards(card_set) - 1) * m_num_buckets[0]) / 169;
+	return  ((eval::rankTwoCards(hole_cards[position][0],hole_cards[position][1]) - 1) * m_num_buckets[0]) / 169;
 }
 
 int EHS_Bucketing::getBucket_flop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS],
 			const int position) const {
 
-	return getFlopBucketByHandStrength(board_cards,hole_cards,position);
+	return getFlopBucketByHandStrength(board_cards,hole_cards,position,(uint8_t)m_num_buckets[1]);
 }
 
 int EHS_Bucketing::getBucket_turn(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS],
@@ -238,7 +232,7 @@ int EHS_Bucketing::getBucket_turn(const int8_t board_cards[MAX_BOARD_CARDS], con
 		}
 	}*/
 	
-	return 1;
+	return getFlopBucketByHandStrength(board_cards, hole_cards, position, (uint8_t)m_num_buckets[1]);
 }
 
 int EHS_Bucketing::getBucket_river(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS],
@@ -275,6 +269,138 @@ int EHS_Bucketing::getBucket_river(const int8_t board_cards[MAX_BOARD_CARDS], co
 	}
 
 	return lose_cardset * m_num_buckets[3] / 1326;
+}
+
+void EHS_Bucketing::getBucketForAllHand(const Game* game, const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int> buckets[4])const {
+
+	for (int i = 0; i < 4; i++) {
+		getBucketForAllHand(game, i, board_cards, buckets[i]);
+	}
+
+	return;
+}
+
+void EHS_Bucketing::getBucketForAllHand(const Game* game, const BettingNode* node,
+	const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const {
+
+	buckets.resize(1326, -1);
+
+	switch (node->getRound()) {
+	case 0:
+		getBucketAll_preflop(board_cards, buckets);
+		break;
+	case 1:
+		getBucketAll_flop(board_cards, buckets);
+		break;
+	case 2:
+		getBucketAll_turn(board_cards, buckets);
+		break;
+	case 3:
+		getBucketAll_river(board_cards, buckets);
+		break;
+
+	default:
+		assert(0);
+	}
+
+	return;
+}
+
+void EHS_Bucketing::getBucketForAllHand(const Game* game, const int round,
+	const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const {
+
+	buckets.resize(1326, -1);
+
+	switch (round) {
+	case 0:
+		getBucketAll_preflop(board_cards, buckets);
+		break;
+	case 1:
+		getBucketAll_flop(board_cards, buckets);
+		break;
+	case 2:
+		getBucketAll_turn(board_cards, buckets);
+		break;
+	case 3:
+		getBucketAll_river(board_cards, buckets);
+		break;
+
+	default:
+		assert(0);
+	}
+
+	return;
+}
+
+void EHS_Bucketing::getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const{
+
+	for (int i = 0; i < 1326; i++) {
+		int c1 = index_to_card_one[i];
+		int c2 = index_to_card_two[i];
+
+		if (c1 == board_cards[0] || c1 == board_cards[1] || c1 == board_cards[2] ||
+			c2 == board_cards[0] || c2 == board_cards[1] || c2 == board_cards[2])
+			continue;
+
+		buckets[i] = (eval::rankTwoCards(c1, c2) - 1) * m_num_buckets[0] / 169;
+	}
+}
+
+void EHS_Bucketing::getBucketAll_flop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const {
+
+}
+
+void EHS_Bucketing::getBucketAll_turn(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const {
+
+}
+
+bool pairComp(std::pair<int, int> p1, std::pair<int, int> p2) {
+	return p1.second > p2.second;
+}
+
+void EHS_Bucketing::getBucketAll_river(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const {
+
+	std::vector< std::pair<int,int> > hand_point;
+
+	CardSet board_cardset = eval::emptyCardset();
+
+	for (int i = 0; i < 5; i++) {
+		eval::addCardToCardSet(&board_cardset, board_cards[i] / 13, board_cards[i] % 13);
+	}
+
+	for (int i = 0; i < 1326; i++) {
+		int c1 = index_to_card_one[i];
+		int c2 = index_to_card_two[i];
+
+		if (c1 == board_cards[0] || c1 == board_cards[1] || c1 == board_cards[2] ||
+			c2 == board_cards[0] || c2 == board_cards[1] || c2 == board_cards[2]){
+
+			hand_point.push_back(std::make_pair(i, 0));
+			continue;
+		}
+
+		CardSet hand(board_cardset);
+		eval::addCardToCardSet(&hand, c1 / 13, c1 % 13);
+		eval::addCardToCardSet(&hand, c2 / 13, c2 % 13);
+
+		hand_point.push_back(std::make_pair(i, eval::rankCardset(hand)));
+	}
+
+	std::sort(hand_point.begin(), hand_point.end(), pairComp);
+
+	int rank = 0;
+	int prev = -1;
+
+	for (int i = 0; i < hand_point.size(); i++) {
+		buckets[hand_point[i].first] = rank * m_num_buckets[3] / 1326;
+
+		if (prev != hand_point[i].second) {
+			prev = hand_point[i].second;
+			rank = i+1;
+		}
+	}
+
+	return;
 }
 
 bool EHS_Bucketing::canPrecomputeBuckets() const {

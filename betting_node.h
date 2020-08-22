@@ -8,6 +8,7 @@
 
 #include "acpc_code/game.h"
 #include "action_abstraction.h"
+#include "const.h"
 #include "hand.h"
 #include <assert.h>
 
@@ -35,7 +36,6 @@ protected:
 	BettingNode* sibling;
 
 public:
-
 	static int64_t size;
 	
 };
@@ -83,14 +83,19 @@ protected:
 	const int8_t player;
 	const int8_t round;
 	const BettingNode* child;
-};
+}; 
 
 BettingNode* initBettingTree(State& state,
 	const Game* game,
 	const ActionAbstraction* action_abstraction,
-	size_t num_entries_per_bucket[MAX_ROUNDS],
-	int8_t raise_time
+	size_t num_entries_per_bucket[MAX_ROUNDS]/*,
+	int8_t raise_time*/
 );
+
+/*BettingNode* initPreciseTree(BettingNode* itinial_node,
+	State& curState,
+	const Game* game,
+	const ActionAbstraction* finer_abs);*/
 
 
 

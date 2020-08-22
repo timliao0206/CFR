@@ -61,8 +61,8 @@ int64_t BettingNode::size;
 BettingNode* initBettingTree(State& state,
 	const Game* game,
 	const ActionAbstraction* action_abstraction,
-	size_t num_entries_per_bucket[MAX_ROUNDS],
-	int8_t raise_time) {
+	size_t num_entries_per_bucket[MAX_ROUNDS]/*,
+	int8_t raise_time*/) {
 
 	BettingNode::size++;
 
@@ -101,12 +101,10 @@ BettingNode* initBettingTree(State& state,
 
 	for (int a = 0; a < num_action; a++) {
 
-		if (a >= 2 && raise_time >= action_abstraction->getMaxRound(state.round)) break;
-
 		State tmp_state(state);
 		doAction(game, &actions[a], &tmp_state);
 
-		BettingNode* child = initBettingTree(tmp_state, game, action_abstraction, num_entries_per_bucket,( a < 2 ? 0 : raise_time + 1));
+		BettingNode* child = initBettingTree(tmp_state, game, action_abstraction, num_entries_per_bucket/*,(a>=2 ? raise_time+1 : 0)*/);
 
 		if (first == NULL) {
 			first = child;
@@ -117,7 +115,7 @@ BettingNode* initBettingTree(State& state,
 		}
 
 		last = child;
-	}
+	};
 
 	assert(first != NULL && last != NULL);
 
@@ -127,3 +125,36 @@ BettingNode* initBettingTree(State& state,
 
 	return node;
 }
+
+/*BettingNode* initPreciseTree(BettingNode* init_node,
+	State& cur_state,
+	const Game* game,
+	const ActionAbstraction* finer_abs) {
+
+	if (cur_state.finished) {
+
+		bool fold = cur_state.playerFolded[0] || cur_state.playerFolded[1];
+
+		int8_t fold_value[2];
+		int32_t money;
+
+		if (fold) {
+			fold_value[0] = cur_state.playerFolded[0] != 0 ? -1 : 1;
+			fold_value[1] = cur_state.playerFolded[1] != 0 ? -1 : 1;
+			money = cur_state.spent[(cur_state.playerFolded[0] != 0 ? 0 : 1)];
+		}
+		else {
+			fold_value[0] = 0;
+			fold_value[1] = 0;
+			money = cur_state.spent[0];
+		}
+
+		TerminalNode* node = new TerminalNode(!fold, fold_value, money);
+
+		return node;
+	}
+
+
+}*/
+
+

@@ -6,6 +6,7 @@
 #include "betting_node.h"
 #include "storage.h"
 #include "card_abstraction.h"
+#include "const.h"
 
 #include <vector>
 #include <string>
@@ -30,11 +31,18 @@ public:
 	virtual void printRegretSum(std::string fileName) const;
 	virtual void printStrategySum(std::string fileName) const;
 
+	virtual double expectedValue(const BettingNode* node, const Hand hand, const int position) const;
+	virtual void getHandProbability(const BettingNode* node, const Hand hand, const int position, std::vector<double>& return_value) const;
+
+	virtual void resetStorage(size_t num_entries_per_bucket[MAX_ROUNDS]);
+
 	virtual void readFile(std::string fileName);
 
 	virtual const CardAbstraction* getCardAbstraction() const{ return card_abs; }
 	virtual const Game* getGame() const{ return game; }
 protected:
+
+	virtual double expectedValue(const BettingNode* node, const Hand hand, const int position, const std::vector<int> buckets[4],std::vector<double> hand_probs) const;
 
 	virtual std::string methodName() const = 0;
 
@@ -57,6 +65,8 @@ public:
 	virtual void updateRegret(const BettingNode* node, const Hand hand, const int position, std::vector<double> regret) { return; };
 	virtual void updateStrategySum(const BettingNode* node, const Hand hand, const int position, std::vector<double> strategy) { return; };
 	virtual int sampleAction(const BettingNode* node, const Hand hand, const int position) const;
+
+	
 
 	virtual void printRegretSum(std::string fileName) const { assert(0); };
 	virtual void printStrategySum(std::string fileName) const { assert(0); };

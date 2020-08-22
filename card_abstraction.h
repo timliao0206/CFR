@@ -7,6 +7,8 @@ extern "C" {
 }
 
 #include "betting_node.h"
+#include "FiveCardBucket.h"
+#include "const.h"
 
 class CardAbstraction {
 public:
@@ -18,6 +20,13 @@ public:
 	virtual int numBuckets(const Game* game, const State& state) const = 0;
 	virtual int getBucket(const Game* game, const BettingNode* node,
 		const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const = 0;
+
+	virtual void getBucketForAllHand(const Game* game, const BettingNode* node,
+		const int8_t board_cards[MAX_BOARD_CARDS],std::vector<int>& buckets)const = 0;
+	virtual void getBucketForAllHand(const Game* game, const int round,
+		const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const = 0;
+
+	virtual void getBucketForAllHand(const Game* game, const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>[4]) const = 0;
 
 	virtual bool canPrecomputeBuckets() const { return false; }
 	virtual void precomputeBuckets(const Game* game, Hand& hand) const { };
@@ -35,6 +44,14 @@ public:
 	virtual int getBucket(const Game* game, const BettingNode* node,
 		const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
 
+	virtual void getBucketForAllHand(const Game* game, const BettingNode* node,
+		const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const;
+
+	virtual void getBucketForAllHand(const Game* game, const int round,
+		const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const;
+
+	virtual void getBucketForAllHand(const Game* game, const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int> buckets[4]) const;
+
 	virtual bool canPrecomputeBuckets() const;
 	virtual void precomputeBuckets(const Game* game, Hand& hand) const;
 	virtual void precomputeBuckets(const Game* game, Hand& hand, const int position) const;
@@ -45,6 +62,12 @@ private:
 	int getBucket_flop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
 	int getBucket_turn(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
 	int getBucket_river(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
+
+	void getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS],std::vector<int>& buckets) const;
+	void getBucketAll_flop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+	void getBucketAll_turn(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+	void getBucketAll_river(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+
 
 	int m_num_buckets[MAX_ROUNDS];
 

@@ -96,6 +96,8 @@ int PropotionalActionAbstraction::getActions(const Game* game, const State& stat
 
 		if (action.type == a_raise) {
 
+			if (numRaises(&state) >= this->max_raise_time[state.round]) break;
+
 			int32_t min_raise_size = 0;
 			int32_t max_raise_size = 0;
 

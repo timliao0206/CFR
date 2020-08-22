@@ -4,6 +4,7 @@
 
 #include <inttypes.h>
 #include <vector>
+#include "const.h"
 
 extern "C" {
 #include "acpc_code/game.h"

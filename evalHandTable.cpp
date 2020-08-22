@@ -4344,3 +4344,10 @@ int eval::rankTwoCards(const CardSet cards) {
     
     return twoCardRank[card[0]][card[1]];
 }
+
+int eval::rankTwoCards(const int card1, const int card2) {
+
+    assert(card1 < 52 && card2 < 52);
+
+    return twoCardRank[card1][card2];
+}

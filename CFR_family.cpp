@@ -207,6 +207,37 @@ void CFR::readFile(std::string fileName) {
 	}
 }
 
+double CFR::expectedValue(const BettingNode* node, const Hand hand, const int position) const {
+	int num_hand = (game->numRanks * game->numSuits) * (game->numRanks * game->numSuits - 1);
+
+	std::vector<double> enter_probs(num_hand,0);
+
+	getHandProbability(node, hand, position, enter_probs);
+
+	std::vector<int> buckets[4];
+
+	card_abs->getBucketForAllHand(game, hand.board_cards,buckets);
+
+	return expectedValue(node, hand, position, buckets,enter_probs);
+}
+
+double CFR::expectedValue(const BettingNode* node, const Hand hand, const int position, const std::vector<int> buckets[4],std::vector<double> hand_probs)const {
+	//TO-DO
+	
+	return 0;
+}
+
+void CFR::getHandProbability(const BettingNode* node, const Hand hand, const int position, std::vector<double>& probs)const {
+	//TO-DO
+}
+
+void CFR::resetStorage(size_t num_entries_per_bucket[MAX_ROUNDS]) {
+	for (int i = 0; i < MAX_ROUNDS; i++) {
+		free(stored[i]);
+		stored[i] = new Storage(num_entries_per_bucket[i]);
+	}
+}
+
 RandomPlayer::RandomPlayer(const Game* new_game, const CardAbstraction* new_card_abs){
 	game = new_game;
 	card_abs = new_card_abs;
