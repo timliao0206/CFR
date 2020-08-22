@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include "const.h"
 
 class Storage {
 private:
