@@ -1,5 +1,6 @@
 #include "FiveCardBucket.h"
 #include <algorithm>
+#include <string>
 
 using std::vector;
 
@@ -244,22 +245,13 @@ uint8_t getFlopBucketByHandStrength(uint8_t first_hand_card, uint8_t second_hand
 	}
 }
 
-<<<<<<< HEAD
-uint8_t getFlopBucketByHandStrength(const int8_t board_cards[7/*max board cards*/],const int8_t hole_cards[10/*max player*/][3/*max hole cards*/],const int position)
-=======
-uint8_t getFlopBucketByHandStrength(const uint8_t board_cards[7/*max board cards*/], uint8_t hole_cards[10/*max player*/][3/*max hole cards*/], int position, uint8_t num_bucket)
->>>>>>> 8413327a30289254a2e5389ad1263c9dbf7b0bba
+uint8_t getFlopBucketByHandStrength(const int8_t board_cards[7],const int8_t hole_cards[10][3], const int position, uint8_t num_bucket)
 {
 	uint8_t for_sort[3];
 	for_sort[0] = board_cards[0];
 	for_sort[1] = board_cards[1];
 	for_sort[2] = board_cards[2];
 	std::sort(for_sort, for_sort + 3);
-<<<<<<< HEAD
-	return getFlopBucketByHandStrength((uint8_t)std::min(hole_cards[position][0], hole_cards[position][1]), 
-		(uint8_t)std::max(hole_cards[position][0], hole_cards[position][1]), for_sort[0], for_sort[1], for_sort[2]);
-=======
 	return getFlopBucketByHandStrength(std::min(hole_cards[position][0], hole_cards[position][1]), 
 		std::max(hole_cards[position][0], hole_cards[position][1]), for_sort[0], for_sort[1], for_sort[2], num_bucket);
->>>>>>> 8413327a30289254a2e5389ad1263c9dbf7b0bba
 }
