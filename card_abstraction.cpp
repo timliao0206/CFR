@@ -12,7 +12,51 @@ CardAbstraction::~CardAbstraction() {
 
 }
 
-const int EHS_Bucketing::index_to_card_two[1326] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
+//get a vector which containing all possible hand , and it's element indicates the hand strength between
+//hole card and the representation of it's index.1 = hole card win, 0 = draw , -1 = opponent win.
+void CardAbstraction::getDefeatedHand(const Game* game, const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_HOLE_CARDS], std::vector<int>& defeated)const {
+	
+	defeated.resize(1326, 0);
+
+	CardSet board = eval::emptyCardset();
+	
+	for (int i = 0; i < 5; i++) {
+		eval::addCardToCardSet(&board, board_cards[i] / 13, board_cards[i] % 13);
+	}
+
+	CardSet self(board);
+
+	eval::addCardToCardSet(&self, hole_cards[0] / 13, hole_cards[0] % 13);
+	eval::addCardToCardSet(&self, hole_cards[1] / 13, hole_cards[1] % 13);
+
+	int self_hand_point = eval::rankCardset(self);
+
+	for (int i = 0; i < 1326; i++) {
+		int card1 = index_to_card_one[i];
+		int card2 = index_to_card_two[i];
+		
+		if (card1 == board_cards[0] || card1 == board_cards[1] || card1 == board_cards[2] || card1 == board_cards[3] || card1 == board_cards[4] || card1 == hole_cards[0] || card1 == hole_cards[1] ||
+			card2 == board_cards[0] || card2 == board_cards[1] || card2 == board_cards[2] || card2 == board_cards[3] || card2 == board_cards[4] || card2 == hole_cards[0] || card2 == hole_cards[1]) {
+			defeated[i] = 0;
+			continue;
+		}
+
+		CardSet opponent(board);
+		eval::addCardToCardSet(&opponent, card1 / 13, card1 % 13);
+		eval::addCardToCardSet(&opponent, card2 / 13, card2 % 13);
+
+		int opponent_hand_point = eval::rankCardset(opponent);
+
+		if (self_hand_point > opponent_hand_point)
+			defeated[i] = 1;
+		else if (opponent_hand_point > self_hand_point)
+			defeated[i] = -1;
+		else
+			defeated[i] = 0;
+	}
+}
+
+const int CardAbstraction::index_to_card_two[1326] = { 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
 2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
 4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,
@@ -63,7 +107,7 @@ const int EHS_Bucketing::index_to_card_two[1326] = { 1,2,3,4,5,6,7,8,9,10,11,12,
 49,50,51,
 50,51,
 51};
-const int EHS_Bucketing::index_to_card_one[1326] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+const int CardAbstraction::index_to_card_one[1326] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,
@@ -339,8 +383,10 @@ void EHS_Bucketing::getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARD
 		int c2 = index_to_card_two[i];
 
 		if (c1 == board_cards[0] || c1 == board_cards[1] || c1 == board_cards[2] ||
-			c2 == board_cards[0] || c2 == board_cards[1] || c2 == board_cards[2])
+			c2 == board_cards[0] || c2 == board_cards[1] || c2 == board_cards[2]) {
+			buckets[i] = 0;
 			continue;
+		}
 
 		buckets[i] = (eval::rankTwoCards(c1, c2) - 1) * m_num_buckets[0] / 169;
 	}

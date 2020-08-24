@@ -28,9 +28,15 @@ public:
 
 	virtual void getBucketForAllHand(const Game* game, const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>[4]) const = 0;
 
+	virtual void getDefeatedHand(const Game* game, const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_card[MAX_HOLE_CARDS], std::vector<int>& defeated) const;
+
 	virtual bool canPrecomputeBuckets() const { return false; }
 	virtual void precomputeBuckets(const Game* game, Hand& hand) const { };
 	virtual void precomputeBuckets(const Game* game, Hand& hand, const int position) const { };
+
+protected:
+	static const int index_to_card_one[1326];
+	static const int index_to_card_two[1326];
 };
 
 class EHS_Bucketing : public CardAbstraction {
@@ -71,8 +77,7 @@ private:
 
 	int m_num_buckets[MAX_ROUNDS];
 
-	static const int index_to_card_one[1326];
-	static const int index_to_card_two[1326];
+	
 };
 
 class RealProbBucketing_train : public CardAbstraction{

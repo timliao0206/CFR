@@ -22,6 +22,13 @@ int CFR::getStrategy(const BettingNode* node, const Hand hand, const int positio
 	return stored[node->getRound()]->getStrategy(index, bucket, node->getNumAction(), strategy);
 }
 
+int CFR::getStrategy(const BettingNode* node,const int bucket, std::vector<double>& strategy) const {
+
+	int64_t index = node->getIndex();
+
+	return stored[node->getRound()]->getStrategy(index, bucket, node->getNumAction(), strategy);
+}
+
 int CFR::getAverageStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const {
 	int64_t index = node->getIndex();
 	int bucket = 0;
@@ -207,28 +214,88 @@ void CFR::readFile(std::string fileName) {
 	}
 }
 
-double CFR::expectedValue(const BettingNode* node, const Hand hand, const int position) const {
+double CFR::expectedValue(const BettingNode* root, const std::queue<int> action_sequence , const BettingNode* node, const Hand hand, const int position) const {
+	
 	int num_hand = (game->numRanks * game->numSuits) * (game->numRanks * game->numSuits - 1);
-
-	std::vector<double> enter_probs(num_hand,0);
-
-	getHandProbability(node, hand, position, enter_probs);
 
 	std::vector<int> buckets[4];
 
 	card_abs->getBucketForAllHand(game, hand.board_cards,buckets);
 
-	return expectedValue(node, hand, position, buckets,enter_probs);
+	std::vector<int> win_or_lose;
+	card_abs->getDefeatedHand(game, hand.board_cards, hand.hole_cards[position], win_or_lose);
+
+	std::vector<double> enter_probs(num_hand, 0);
+
+	getHandProbability(node,action_sequence,buckets , enter_probs);
+
+	return expectedValue(node, buckets,enter_probs,win_or_lose);
 }
 
-double CFR::expectedValue(const BettingNode* node, const Hand hand, const int position, const std::vector<int> buckets[4],std::vector<double> hand_probs)const {
-	//TO-DO
+double CFR::expectedValue(const BettingNode* node,const std::vector<int> buckets[4],const std::vector<double> hand_probs, std::vector<int> win_or_lose)const {
+	//terminal node
+	if (node->getChild() == NULL) {
+		int pot = node->getPot();
+
+		double rate = 0;
+		for (int i = 0; i < 1326; i++) {
+			rate += hand_probs[i] * win_or_lose[i];
+		}
+
+		return pot * rate;
+	}
+
+	const int num_action = node->getNumAction();
+	const int num_bucket = card_abs->numBuckets(game, node);
+
+	std::vector< std::vector<double> > strategy;
+	strategy.resize(num_bucket);
+
+	for (int i = 0; i < num_bucket; i++) {
+		getStrategy(node, i, strategy[i]);
+	}
+
+	const BettingNode* child(node->getChild());
+
+	double return_value = 0;
+
+	for (int action = 0; action < num_action; action++) {
+		std::vector<double> next_prob(hand_probs);
+
+		for (int i = 0; i < 1326; i++) {
+			next_prob[i] *= strategy[buckets[node->getRound()][i]][action];
+		}
+
+		return_value += expectedValue(child,buckets, next_prob, win_or_lose);
+
+		child = child->getSibiling();
+	}
+
+	return return_value;
+}
+
+void CFR::getHandProbability(const BettingNode* root, const std::queue<int> action_sequence,const std::vector<int> buckets[4] , std::vector<double>& probs)const {
 	
-	return 0;
-}
+	const BettingNode* cur_node(root);
+	std::queue<int> actions(action_sequence);
 
-void CFR::getHandProbability(const BettingNode* node, const Hand hand, const int position, std::vector<double>& probs)const {
-	//TO-DO
+	while (!actions.empty()) {
+		int num_buckets = card_abs->numBuckets(game, cur_node);
+		int round = cur_node->getRound();
+
+		std::vector< std::vector<double> > strategy;
+		strategy.resize(num_buckets);
+
+		for (int i = 0; i < num_buckets; i++) 
+			getStrategy(cur_node, i, strategy[i]);
+		
+		for (int i = 0; i < 1326; i++) {
+			probs[i] *= strategy[buckets[round][i]][action_sequence.front()];
+		}
+
+		cur_node = cur_node->doAction(action_sequence.front());
+		actions.pop();
+	}
 }
 
 void CFR::resetStorage(size_t num_entries_per_bucket[MAX_ROUNDS]) {

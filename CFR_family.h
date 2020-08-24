@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <string>
+#include <queue>
 
 extern "C" {
 #include "acpc_code/game.h"
@@ -23,6 +24,7 @@ public:
 	virtual double getExploitability(const BettingNode* root) const = 0;
 
 	virtual int getStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const;
+	virtual int getStrategy(const BettingNode* node, const int bucket, std::vector<double>& strategy) const;
 	virtual int getAverageStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const;
 	virtual void updateRegret(const BettingNode* node, const Hand hand, const int position, std::vector<double> regret);
 	virtual void updateStrategySum(const BettingNode* node, const Hand hand, const int position, std::vector<double> strategy);
@@ -31,8 +33,8 @@ public:
 	virtual void printRegretSum(std::string fileName) const;
 	virtual void printStrategySum(std::string fileName) const;
 
-	virtual double expectedValue(const BettingNode* node, const Hand hand, const int position) const;
-	virtual void getHandProbability(const BettingNode* node, const Hand hand, const int position, std::vector<double>& return_value) const;
+	virtual double expectedValue(const BettingNode* root, const std::queue<int> action_sequence, const BettingNode* node, const Hand hand, const int position) const;
+	virtual void getHandProbability(const BettingNode* root, const std::queue<int> action_sequence,const std::vector<int> bucket[4], std::vector<double>& return_value) const;
 
 	virtual void resetStorage(size_t num_entries_per_bucket[MAX_ROUNDS]);
 
@@ -42,7 +44,7 @@ public:
 	virtual const Game* getGame() const{ return game; }
 protected:
 
-	virtual double expectedValue(const BettingNode* node, const Hand hand, const int position, const std::vector<int> buckets[4],std::vector<double> hand_probs) const;
+	virtual double expectedValue(const BettingNode* node,const std::vector<int> buckets[4],std::vector<double> hand_probs,const std::vector<int> win_or_lose) const;
 
 	virtual std::string methodName() const = 0;
 
