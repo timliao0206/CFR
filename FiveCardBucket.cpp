@@ -253,3 +253,43 @@ uint8_t getFlopBucketByHandStrength(const uint8_t board_cards[7/*max board cards
 	return getFlopBucketByHandStrength(std::min(hole_cards[position][0], hole_cards[position][1]), 
 		std::max(hole_cards[position][0], hole_cards[position][1]), for_sort[0], for_sort[1], for_sort[2], num_bucket);
 }
+
+// return 0 if have repeat cards, else return 1
+uint8_t getAllPossibleFlopBucketByHandStrength(const uint8_t board_cards[5/*all board cards*/], vector<uint8_t>& output, uint8_t num_bucket)
+{
+	output.clear();
+	output.shrink_to_fit();
+
+	uint8_t cards_for_read[7];
+	for (uint8_t i = 0; i < 5; ++i)
+	{
+		cards_for_read[i + 2] = board_cards[i];
+	}
+	std::sort(cards_for_read + 2, cards_for_read + 7);
+
+	uint8_t* it = std::adjacent_find(cards_for_read + 2, cards_for_read + 7);
+	if (it == cards_for_read + 7)
+	{
+		return 0;
+	}
+
+	for (uint8_t h1 = 0; h1 < 52; ++h1)
+	{
+		
+		for (uint8_t h2 = h1 + 1; h2 < 52; ++h2)
+		{
+			if (h1 != board_cards[0] && h1 != board_cards[1] && h1 != board_cards[2] && h1 != board_cards[3] && h1 != board_cards[4]
+				&& h2 != board_cards[0] && h2 != board_cards[1] && h2 != board_cards[2] && h2 != board_cards[3] && h2 != board_cards[4])
+			{
+				cards_for_read[0] = h1;
+				cards_for_read[1] = h2;
+				output.push_back(getFlopBucketByHandStrength(cards_for_read[0], cards_for_read[1], cards_for_read[2], cards_for_read[3], cards_for_read[4], num_bucket));
+			}
+			else
+			{
+				output.push_back(0);
+			}
+		}
+	}
+	return 1;
+}
