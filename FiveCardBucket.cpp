@@ -268,8 +268,9 @@ uint8_t getAllPossibleFlopBucketByHandStrength(const uint8_t board_cards[5/*all 
 	std::sort(cards_for_read + 2, cards_for_read + 7);
 
 	uint8_t* it = std::adjacent_find(cards_for_read + 2, cards_for_read + 7);
-	if (it == cards_for_read + 7)
+	if (it != cards_for_read + 7)
 	{
+		std::cout << "ERROR in FiveCardBucket.cpp getAllPossibleFlopBucketByHandStrength, please check your input cards.\n";
 		return 0;
 	}
 
@@ -283,6 +284,10 @@ uint8_t getAllPossibleFlopBucketByHandStrength(const uint8_t board_cards[5/*all 
 			{
 				cards_for_read[0] = h1;
 				cards_for_read[1] = h2;
+				for (uint8_t i = 0; i < 5; ++i)
+				{
+					std::cout << (int)(cards_for_read[i]) << std::endl;
+				}
 				output.push_back(getFlopBucketByHandStrength(cards_for_read[0], cards_for_read[1], cards_for_read[2], cards_for_read[3], cards_for_read[4], num_bucket));
 			}
 			else
