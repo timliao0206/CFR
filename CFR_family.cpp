@@ -276,6 +276,11 @@ double CFR::expectedValue(const BettingNode* node,const std::vector<int> buckets
 
 void CFR::getHandProbability(const BettingNode* root, const std::queue<int> action_sequence,const std::vector<int> buckets[4] , std::vector<double>& probs)const {
 	
+	const double initial_probs = 1.0 / 990.0;
+
+	probs.clear();
+	probs.resize(1326, initial_probs);
+
 	const BettingNode* cur_node(root);
 	std::queue<int> actions(action_sequence);
 

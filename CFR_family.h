@@ -19,28 +19,53 @@ extern "C" {
 class CFR {
 public:
 
+	//do iterations of this CFR
 	virtual void doIteration(const BettingNode* root) = 0;
 	virtual void doIteration(const BettingNode* root, const int times) = 0;
+
+	//compute this agent's exploitability (currently not working because of unknown reason)
 	virtual double getExploitability(const BettingNode* root) const = 0;
 
+	//Infomation Set mentioned below was comprised of a BettingNode and a Hand + PlayerPosition
+
+	//get Strategy of given Infomation Set by regret-matching, returning values in strategy vector 
 	virtual int getStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const;
 	virtual int getStrategy(const BettingNode* node, const int bucket, std::vector<double>& strategy) const;
+
+	//get AverageStrategy of given Infomation Set by averaging all previous strategy, returning value in strategy vector
 	virtual int getAverageStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const;
+	
+	//update regret value of given Infomation Set
 	virtual void updateRegret(const BettingNode* node, const Hand hand, const int position, std::vector<double> regret);
+
+	//update strategy sum of given Infomation Set
 	virtual void updateStrategySum(const BettingNode* node, const Hand hand, const int position, std::vector<double> strategy);
+	
+	//sample an action based on regret-matching-generated strategy
 	virtual int sampleAction(const BettingNode* node, const Hand hand, const int position) const;
 
+	//print regret sum into a file
 	virtual void printRegretSum(std::string fileName) const;
+
+	//print strategy sum into a file
 	virtual void printStrategySum(std::string fileName) const;
 
+	//get expected value of given Infomation Set
 	virtual double expectedValue(const BettingNode* root, const std::queue<int> action_sequence, const BettingNode* node, const Hand hand, const int position) const;
+	
+	//get the probability of reaching given Infomation Set of all possible private hand
 	virtual void getHandProbability(const BettingNode* root, const std::queue<int> action_sequence,const std::vector<int> bucket[4], std::vector<double>& return_value) const;
 
+	//clear all the data in this object, and reset parameters.
 	virtual void resetStorage(size_t num_entries_per_bucket[MAX_ROUNDS]);
 
+	//read datas in the given file, 
 	virtual void readFile(std::string fileName);
 
+	//get the card abstraction pointer
 	virtual const CardAbstraction* getCardAbstraction() const{ return card_abs; }
+
+	//get the game pointer
 	virtual const Game* getGame() const{ return game; }
 protected:
 

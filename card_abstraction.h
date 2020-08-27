@@ -69,11 +69,13 @@ private:
 	int getBucket_turn(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
 	int getBucket_river(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
 
-	void getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS],std::vector<int>& buckets) const;
+	
 	void getBucketAll_flop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
 	void getBucketAll_turn(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
-	void getBucketAll_river(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
 
+public:
+	void getBucketAll_river(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+	void getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS],std::vector<int>& buckets) const;
 
 	int m_num_buckets[MAX_ROUNDS];
 
