@@ -31,6 +31,6 @@ uint8_t getFlopBucketByHandStrength(uint8_t, uint8_t, uint8_t, uint8_t, uint8_t,
 
 uint8_t getFlopBucketByHandStrength(const int8_t[7],const int8_t[10][3],const int, uint8_t);
 
-uint8_t getAllPossibleFlopBucketByHandStrength(const uint8_t[5/*all board cards*/], vector<uint8_t>&/*output*/);
+uint8_t getAllPossibleFlopBucketByHandStrength(const uint8_t[5/*all board cards*/], vector<uint8_t>&/*output*/, uint8_t);
 
 #endif
