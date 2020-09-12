@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <random>
+#include <assert.h>
 
 using namespace std::chrono;
 
@@ -214,7 +215,7 @@ void CFR::readFile(std::string fileName) {
 	}
 }
 
-double CFR::expectedValue(const BettingNode* root, const std::queue<int> action_sequence , const BettingNode* node, const Hand hand, const int position) const {
+double CFR::expectedValue(const BettingNode* root, const std::queue<int> action_sequence , const BettingNode* node,const Hand hand, const int position) const {
 	
 	int num_hand = (game->numRanks * game->numSuits) * (game->numRanks * game->numSuits - 1);
 
@@ -227,7 +228,7 @@ double CFR::expectedValue(const BettingNode* root, const std::queue<int> action_
 
 	std::vector<double> enter_probs(num_hand, 0);
 
-	getHandProbability(node,action_sequence,buckets , enter_probs);
+	getHandProbability(root,action_sequence,buckets , enter_probs);
 
 	return expectedValue(node, buckets,enter_probs,win_or_lose);
 }
@@ -283,10 +284,14 @@ void CFR::getHandProbability(const BettingNode* root, const std::queue<int> acti
 
 	const BettingNode* cur_node(root);
 	std::queue<int> actions(action_sequence);
+	assert(buckets[0].size() == 1326);
 
 	while (!actions.empty()) {
 		int num_buckets = card_abs->numBuckets(game, cur_node);
 		int round = cur_node->getRound();
+
+		assert(round <= 4);
+		assert(cur_node->getChild() != NULL);
 
 		std::vector< std::vector<double> > strategy;
 		strategy.resize(num_buckets);
@@ -294,11 +299,17 @@ void CFR::getHandProbability(const BettingNode* root, const std::queue<int> acti
 		for (int i = 0; i < num_buckets; i++) 
 			getStrategy(cur_node, i, strategy[i]);
 		
+		int this_action = actions.front();
 		for (int i = 0; i < 1326; i++) {
-			probs[i] *= strategy[buckets[round][i]][action_sequence.front()];
+
+			int local_bucket = buckets[round][i];
+
+			assert(strategy[local_bucket].size() > this_action);
+			
+			probs[i] *= strategy[local_bucket][this_action];
 		}
 
-		cur_node = cur_node->doAction(action_sequence.front());
+		cur_node = cur_node->doAction(actions.front());
 		actions.pop();
 	}
 }

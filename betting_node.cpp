@@ -47,6 +47,7 @@ InfoSet::~InfoSet() {
 
 const BettingNode* InfoSet::doAction(const int action) const {
 
+	assert(this->child != nullptr);
 	assert(action < num_choice);
 	const BettingNode* cur = this -> child;
 	for (int i = 0; i < action; i++) {

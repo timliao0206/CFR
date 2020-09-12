@@ -96,3 +96,19 @@ Hand generateEmptyHand() {
 
 	return hand;
 }
+
+Hand generateGivenHand(int8_t board[7], int8_t hole[10][3]) {
+	Hand hand;
+
+	for (int i = 0; i < 7; i++) {
+		hand.board_cards[i] = board[i];
+	}
+
+	for (int i = 0; i < 10; i++) {
+		for (int j = 0; j < 3; j++) {
+			hand.hole_cards[i][j] = hole[i][j];
+		}
+	}
+
+	return hand;
+}

@@ -51,7 +51,7 @@ public:
 	virtual void printStrategySum(std::string fileName) const;
 
 	//get expected value of given Infomation Set
-	virtual double expectedValue(const BettingNode* root, const std::queue<int> action_sequence, const BettingNode* node, const Hand hand, const int position) const;
+	virtual double expectedValue(const BettingNode* root, const std::queue<int> action_sequence,const BettingNode* node, const Hand hand, const int position) const;
 	
 	//get the probability of reaching given Infomation Set of all possible private hand
 	virtual void getHandProbability(const BettingNode* root, const std::queue<int> action_sequence,const std::vector<int> bucket[4], std::vector<double>& return_value) const;

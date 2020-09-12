@@ -393,11 +393,11 @@ void EHS_Bucketing::getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARD
 }
 
 void EHS_Bucketing::getBucketAll_flop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const {
-
+	getAllPossibleFlopBucketByHandStrength(board_cards, buckets,10);
 }
 
 void EHS_Bucketing::getBucketAll_turn(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const {
-
+	getAllPossibleFlopBucketByHandStrength(board_cards, buckets, 10);
 }
 
 bool pairComp(std::pair<int, int> p1, std::pair<int, int> p2) {

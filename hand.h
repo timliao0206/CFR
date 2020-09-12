@@ -27,6 +27,8 @@ Hand generateHand(const Game* game);
 
 Hand generateEmptyHand();
 
+Hand generateGivenHand(int8_t board_cards[7], int8_t hole_cards[10][3]);
+
 int dealCard(std::vector<int>& desk);
 
 #endif // !HAND_H

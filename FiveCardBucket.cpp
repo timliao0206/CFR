@@ -257,7 +257,7 @@ uint8_t getFlopBucketByHandStrength(const int8_t board_cards[7],const int8_t hol
 }
 
 // return 0 if have repeat cards, else return 1
-uint8_t getAllPossibleFlopBucketByHandStrength(const uint8_t board_cards[5/*all board cards*/], vector<uint8_t>& output, uint8_t num_bucket)
+uint8_t getAllPossibleFlopBucketByHandStrength(const int8_t board_cards[5/*all board cards*/], vector<int>& output, int8_t num_bucket)
 {
 	output.clear();
 	output.shrink_to_fit();
@@ -286,10 +286,6 @@ uint8_t getAllPossibleFlopBucketByHandStrength(const uint8_t board_cards[5/*all 
 			{
 				cards_for_read[0] = h1;
 				cards_for_read[1] = h2;
-				for (uint8_t i = 0; i < 5; ++i)
-				{
-					std::cout << (int)(cards_for_read[i]) << std::endl;
-				}
 				output.push_back(getFlopBucketByHandStrength(cards_for_read[0], cards_for_read[1], cards_for_read[2], cards_for_read[3], cards_for_read[4], num_bucket));
 			}
 			else

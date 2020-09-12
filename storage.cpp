@@ -13,13 +13,13 @@ Storage::~Storage() {
 }
 
 int64_t Storage::getLocalIndex(const int64_t index, const int bucket) const{
-
 	return ((int64_t)num_entries_per_bucket * bucket) + index;
 }
 
 int Storage::getStrategy(const int64_t index, const int bucket, const int num_action, std::vector<double>& strategy){
 
 	int64_t localIndex = getLocalIndex(index, bucket);
+	strategy.resize(num_action);
 
 	if (localIndex + num_action >= regret_sum.size()) {
 
@@ -33,7 +33,7 @@ int Storage::getStrategy(const int64_t index, const int bucket, const int num_ac
 		return -1;
 	}
 
-	strategy.resize(num_action);
+	
 
 	double sum = 0;
 	for (int i = 0; i < num_action; i++) {
