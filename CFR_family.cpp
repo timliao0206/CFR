@@ -974,7 +974,7 @@ double battle(const Game* game, const BettingNode* root, const CFR* p1, const CF
 				current = current->doAction(p1->sampleAction(current, hand, 0));
 		}
 
-		sum += current->evaluate(hand, 0) / round;
+		sum += current->evaluate(hand, 0) / (double)round;
 
 		p1->getCardAbstraction()->precomputeBuckets(game, hand, 1);
 		p2->getCardAbstraction()->precomputeBuckets(game, hand, 0);
@@ -988,7 +988,7 @@ double battle(const Game* game, const BettingNode* root, const CFR* p1, const CF
 				current = current->doAction(p1->sampleAction(current, hand, 1));
 		}
 
-		sum += current->evaluate(hand, 1) / round;
+		sum += current->evaluate(hand, 1) / (double)round;
 	}
 
 	return sum;

@@ -507,3 +507,57 @@ void RealProbBucketing_train::precomputeBuckets(Hand& hand, int prob[MAX_PLAYERS
 
 	return;
 }
+
+unevenEHS::unevenEHS(const int num_buckets[MAX_ROUNDS],vector<double> bucket_density[MAX_ROUNDS]) : EHS_Bucketing(num_buckets)
+{
+	for (int i = 0; i < MAX_ROUNDS; i++) {
+		m_num_buckets[i] = num_buckets[i];
+		m_bucket_density[i].resize(10);
+
+		double check_one = 0;
+		for (int j = 0; j < m_num_buckets[i]; j++) {
+			m_bucket_density[i][j] = bucket_density[i][j];
+			check_one += bucket_density[i][j];
+		}
+
+		assert(abs(check_one - 1) < 10e-5);
+	}
+}
+
+int unevenEHS::getBucket_preflop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const {
+	int rank = eval::rankTwoCards(hole_cards[position][0], hole_cards[position][1]) - 1;
+
+	return preflopRankToBucket(rank);
+}
+
+void unevenEHS::getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const {
+
+	for (int i = 0; i < 1326; i++) {
+		int c1 = index_to_card_one[i];
+		int c2 = index_to_card_two[i];
+
+		if (c1 == board_cards[0] || c1 == board_cards[1] || c1 == board_cards[2] ||
+			c2 == board_cards[0] || c2 == board_cards[1] || c2 == board_cards[2]) {
+			buckets[i] = 0;
+			continue;
+		}
+
+		int rank = eval::rankTwoCards(c1, c2) - 1;
+		buckets[i] = preflopRankToBucket(rank);
+	}
+}
+
+int unevenEHS::preflopRankToBucket(int rank)const {
+	double PR = (double)rank / 169.0;
+	int bucket = 0;
+	double accu = 0;
+	while (accu <= PR) {
+		if (bucket == 10)
+			break;
+		accu += m_bucket_density[0][bucket];
+		bucket++;
+	}
+	bucket--;
+
+	return bucket;
+}

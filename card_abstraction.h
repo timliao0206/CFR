@@ -62,20 +62,19 @@ public:
 	virtual void precomputeBuckets(const Game* game, Hand& hand) const;
 	virtual void precomputeBuckets(const Game* game, Hand& hand, const int position) const;
 
-private:
+protected:
 
-	int getBucket_preflop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
-	int getBucket_flop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
-	int getBucket_turn(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
-	int getBucket_river(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
+	virtual int getBucket_preflop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
+	virtual int getBucket_flop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
+	virtual int getBucket_turn(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
+	virtual int getBucket_river(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
 
 	
-	void getBucketAll_flop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
-	void getBucketAll_turn(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+	virtual void getBucketAll_flop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+	virtual void getBucketAll_turn(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
 
-public:
-	void getBucketAll_river(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
-	void getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS],std::vector<int>& buckets) const;
+	virtual void getBucketAll_river(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+	virtual void getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS],std::vector<int>& buckets) const;
 
 	int m_num_buckets[MAX_ROUNDS];
 
@@ -99,6 +98,52 @@ public:
 
 	void precomputeBuckets(Hand& hand, int prob[MAX_PLAYERS]) const;
 	virtual void precomputeBuckets(const Game* game, Hand& hand) const { assert(false); }
+};
+
+/*class uneven_EHS : public CardAbstraction {
+public:
+
+	uneven_EHS(vector<double> m_bucket_density[MAX_ROUNDS]);
+	virtual ~uneven_EHS();
+
+	virtual int numBuckets(const Game* game, const BettingNode* node) const;
+	virtual int numBuckets(const Game* game, const State& state) const;
+	virtual int getBucket(const Game* game, const BettingNode* node,
+		const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
+
+	virtual void getBucketForAllHand(const Game* game, const BettingNode* node,
+		const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const;
+	virtual void getBucketForAllHand(const Game* game, const int round,
+		const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets)const;
+
+	virtual void precomputeBuckets(const Game* game, Hand& hand) const { };
+	virtual void precomputeBuckets(const Game* game, Hand& hand, const int position) const { };
+
+protected:
+
+	std::vector<double> m_bucket_density[MAX_ROUNDS];
+	int m_num_buckets[MAX_ROUNDS];
+
+private:
+
+	//get the ES rank in all card.The former is the rank , the latter is the total card set.
+	std::pair<int,int> getRankIn(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position)const;
+	int getAllRank(const int round, const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& hand) const;
+};*/
+
+class unevenEHS : public EHS_Bucketing {
+public:
+	unevenEHS(const int num_buckets[MAX_ROUNDS],vector<double> m_bucket_density[MAX_ROUNDS]);
+
+protected:
+	virtual void getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+	virtual int getBucket_preflop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
+private:
+
+	int preflopRankToBucket(int rank) const;
+
+	std::vector<double> m_bucket_density[MAX_ROUNDS];
+	int m_num_buckets[MAX_ROUNDS];
 };
 
 #endif // !CARD_ABSTRACTION_H
