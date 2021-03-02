@@ -561,3 +561,24 @@ int unevenEHS::preflopRankToBucket(int rank)const {
 
 	return bucket;
 }
+
+testEHS::testEHS(const int num_buckets[MAX_ROUNDS]):EHS_Bucketing(num_buckets) {}
+
+int testEHS::getBucket_preflop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const {
+	return (eval::rankTwoCards(hole_cards[position][0], hole_cards[position][1]) - 1) % m_num_buckets[0];
+}
+
+void testEHS::getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const {
+	for (int i = 0; i < 1326; i++) {
+		int c1 = index_to_card_one[i];
+		int c2 = index_to_card_two[i];
+
+		if (c1 == board_cards[0] || c1 == board_cards[1] || c1 == board_cards[2] ||
+			c2 == board_cards[0] || c2 == board_cards[1] || c2 == board_cards[2]) {
+			buckets[i] = 0;
+			continue;
+		}
+
+		buckets[i] = (eval::rankTwoCards(c1, c2) - 1) % m_num_buckets[0];
+	}
+}

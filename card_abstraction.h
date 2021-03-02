@@ -146,4 +146,11 @@ private:
 	int m_num_buckets[MAX_ROUNDS];
 };
 
+class testEHS : public EHS_Bucketing {
+public:
+	testEHS(const int num_buckets[MAX_ROUNDS]);
+	virtual void getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+	virtual int getBucket_preflop(const int8_t board_cards[MAX_BOARD_CARDS], const int8_t hole_cards[MAX_PLAYERS][MAX_HOLE_CARDS], const int position) const;
+};
+
 #endif // !CARD_ABSTRACTION_H
