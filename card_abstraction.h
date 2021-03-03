@@ -74,6 +74,8 @@ protected:
 	virtual void getBucketAll_turn(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
 
 	virtual void getBucketAll_river(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const;
+
+public:
 	virtual void getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS],std::vector<int>& buckets) const;
 
 	int m_num_buckets[MAX_ROUNDS];

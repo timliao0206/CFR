@@ -395,7 +395,7 @@ void VanillaCfr::doIteration(const BettingNode* root , const int times) {
 		//bucket += (b - a);
 		for (int player = 0; player < game->numPlayers; player++) {
 			walkTree(player, root, hand, 1.0, 1.0);
-			long long c = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+			//long long c = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 			//cfr += (c - b);
 		}
 	}
@@ -1021,4 +1021,59 @@ double battle(const Game* game, const BettingNode* root, const VanillaCfr_RPB* p
 	}
 
 	return sum;
+}
+
+VanillaCFR_fixedOpponent::VanillaCFR_fixedOpponent(const Game* game, size_t num_entries_per_bucket[MAX_ROUNDS], 
+		const CardAbstraction* abs, const CFR* oppo) :VanillaCfr(game,num_entries_per_bucket,abs)
+{
+	opponent = oppo;
+}
+
+VanillaCFR_fixedOpponent::~VanillaCFR_fixedOpponent(){}
+
+double VanillaCFR_fixedOpponent::walkTree(const int position, const BettingNode* cur_node, const Hand hand, double prob_p1, double prob_p2) {
+
+	go_through++;
+
+	//terminal node
+	if (cur_node->getChild() == NULL) {
+		return cur_node->evaluate(hand, position);
+	}
+
+	const int num_choices = cur_node->getNumAction();
+	const int player = cur_node->getPlayer();
+
+	std::vector<double> value(num_choices);
+	std::vector<double> strategy(num_choices);
+	std::vector<double> regret(num_choices);
+
+	if(position == player)
+		this->getStrategy(cur_node, hand, player, strategy);
+	else
+		opponent->getStrategy(cur_node, hand, player, strategy);
+
+	double return_value = 0;
+
+	const BettingNode* child(cur_node->getChild());
+	for (int i = 0; i < num_choices; i++) {
+		if (!player)
+			value[i] = this->walkTree(position, child, hand, strategy[i] * prob_p1 , prob_p2);
+		else
+			value[i] = this->walkTree(position, child, hand, prob_p1, strategy[i] * prob_p2);
+
+		child = child->getSibiling();
+
+		return_value += value[i] * strategy[i];
+	}
+
+	if (position == player) {
+		for (int i = 0; i < num_choices; i++) {
+			regret[i] = (value[i] - return_value) * (position == 0 ? prob_p2 : prob_p1);
+		}
+
+		this->updateRegret(cur_node, hand, position, regret);
+		this->updateStrategySum(cur_node, hand, player, strategy);
+	}
+
+	return return_value;
 }

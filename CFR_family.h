@@ -198,7 +198,17 @@ private:
 	double computeExploitability(const BettingNode* node, const Hand hand, const int position)const { assert(0); return 0; /*TO-DO*/ };
 };
 
+class VanillaCFR_fixedOpponent : public VanillaCfr {
+	VanillaCFR_fixedOpponent(const Game* game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs, const CFR* opponent);
+	~VanillaCFR_fixedOpponent();
+	double walkTree(const int position, const BettingNode* cur_node, const Hand hand, double prob_p1, double prob_p2);
+
+protected:
+
+	//only being used to obtain staretgy
+	const CFR* opponent;
+};
+
 double battle(const Game* game, const BettingNode* root, const CFR* p1, const CFR* p2, const int round);
 double battle(const Game* game, const BettingNode* root, const VanillaCfr_RPB* p1, const VanillaCfr_RPB* p2, const int round);
-
 #endif // !CFR_FAMILY_H

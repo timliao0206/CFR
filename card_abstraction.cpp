@@ -2,6 +2,7 @@
 #include "evalHandTable.h"
 #include <vector>
 #include <algorithm>
+#include <ppl.h>
 #include "FiveCardBucket.h"
 
 CardAbstraction::CardAbstraction() {
@@ -378,6 +379,16 @@ void EHS_Bucketing::getBucketForAllHand(const Game* game, const int round,
 
 void EHS_Bucketing::getBucketAll_preflop(const int8_t board_cards[MAX_BOARD_CARDS], std::vector<int>& buckets) const{
 
+	/*concurrency::parallel_for(0, 1326, [&](int i) {
+		int c1 = index_to_card_one[i];
+		int c2 = index_to_card_two[i];
+
+		buckets[i] = 
+			(c1 == board_cards[0] || c1 == board_cards[1] || c1 == board_cards[2] ||
+			c2 == board_cards[0] || c2 == board_cards[1] || c2 == board_cards[2]) ? 
+			((eval::rankTwoCards(c1, c2) - 1) * m_num_buckets[0] / 169) : 0;
+		});
+	*/
 	for (int i = 0; i < 1326; i++) {
 		int c1 = index_to_card_one[i];
 		int c2 = index_to_card_two[i];
