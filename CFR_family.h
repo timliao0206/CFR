@@ -114,7 +114,7 @@ public:
 	virtual void doIteration(const BettingNode* root);
 	virtual void doIteration(const BettingNode* root, const int times);
 
-	double walkTree(const int position, const BettingNode* cur_node, const Hand hand, double prob_p1, double prob_p2);
+	virtual double walkTree(const int position, const BettingNode* cur_node, const Hand hand, double prob_p1, double prob_p2);
 
 	int getStrategy(const BettingNode* node, const Hand hand, const int position, std::vector<double>& strategy) const;
 	void updateRegret(const BettingNode* node, const Hand hand, const int position, std::vector<double> regret);
@@ -199,9 +199,11 @@ private:
 };
 
 class VanillaCFR_fixedOpponent : public VanillaCfr {
+
+public:
 	VanillaCFR_fixedOpponent(const Game* game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs, const CFR* opponent);
 	~VanillaCFR_fixedOpponent();
-	double walkTree(const int position, const BettingNode* cur_node, const Hand hand, double prob_p1, double prob_p2);
+	virtual double walkTree(const int position, const BettingNode* cur_node, const Hand hand, double prob_p1, double prob_p2);
 
 protected:
 
@@ -211,4 +213,9 @@ protected:
 
 double battle(const Game* game, const BettingNode* root, const CFR* p1, const CFR* p2, const int round);
 double battle(const Game* game, const BettingNode* root, const VanillaCfr_RPB* p1, const VanillaCfr_RPB* p2, const int round);
+
+//This function compute the similarity between two CFR modual.
+//It only consider the preflop and flop turn,since the other two's strategies can be computed real-time.
+//The value ranges from 0 to 1.
+double computeSimilarity(const CFR* p1, const CFR* p2,const BettingNode* root);
 #endif // !CFR_FAMILY_H

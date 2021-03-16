@@ -7,6 +7,8 @@
 #include <fstream>
 #include <random>
 #include <assert.h>
+#include <queue>
+#include <math.h>
 
 using namespace std::chrono;
 
@@ -1076,4 +1078,58 @@ double VanillaCFR_fixedOpponent::walkTree(const int position, const BettingNode*
 	}
 
 	return return_value;
+}
+
+double computeSimilarity(const CFR* p1, const CFR* p2,const BettingNode* root) {
+
+	//traverse the tree by BFS
+	std::queue< const BettingNode* > bfs;
+	bfs.push(root);
+
+	double p1_lengthSquare = 0;
+	double p2_lengthSquare = 0;
+
+	double innerProductAcc = 0;
+
+	vector <double> P1strategy;
+	vector <double> P2strategy;
+
+	P1strategy.resize(MAX_ABSTRACT_ACTIONS);
+	P2strategy.resize(MAX_ABSTRACT_ACTIONS);
+
+	while (!bfs.empty()) {
+		const BettingNode* node = bfs.front();
+		bfs.pop();
+
+		//if the node reaches the second street or someone folded
+		if (node->getRound() >= 2 || node->getChild() == nullptr)
+			continue;
+		
+		//for all buckets in the node
+		for (int bucket = 0; bucket < p1->getCardAbstraction()->numBuckets(p1->getGame(), node); bucket++) {
+			//get strategy
+			p1->getStrategy(node, bucket, P1strategy);
+			p2->getStrategy(node, bucket, P2strategy);
+
+			//accumulate the value
+			for (int action = 0; action < node->getNumAction(); action++) {
+				p1_lengthSquare += P1strategy[action] * P1strategy[action];
+				p2_lengthSquare += P2strategy[action] * P2strategy[action];
+
+				innerProductAcc += P1strategy[action] * P2strategy[action];
+			}
+
+			P1strategy.clear();
+			P2strategy.clear();
+		}
+
+		//push sibiling node
+		if (node->getSibiling() != nullptr)
+			bfs.push(node->getSibiling());
+		
+		//push child node
+		bfs.push(node->getChild());
+	}
+
+	return innerProductAcc / sqrt(p1_lengthSquare * p2_lengthSquare);
 }
