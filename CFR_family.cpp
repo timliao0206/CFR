@@ -1080,6 +1080,17 @@ double VanillaCFR_fixedOpponent::walkTree(const int position, const BettingNode*
 	return return_value;
 }
 
+ES_fixedOpponent::ES_fixedOpponent(const Game* game, size_t num_entries_per_bucket[MAX_ROUNDS],
+	const CardAbstraction* abs, const CFR* oppo):ES(game,num_entries_per_bucket,abs) {
+	opponent = oppo;
+}
+
+ES_fixedOpponent::~ES_fixedOpponent(){}
+
+int ES_fixedOpponent::sampleAction(const BettingNode* node, const Hand hand, const int position) const {
+	return opponent->sampleAction(node, hand, position);
+}
+
 double computeSimilarity(const CFR* p1, const CFR* p2,const BettingNode* root) {
 
 	//traverse the tree by BFS

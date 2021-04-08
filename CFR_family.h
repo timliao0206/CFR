@@ -165,7 +165,7 @@ public:
 
 	virtual void doIteration(const BettingNode* root);
 	virtual void doIteration(const BettingNode* root, const int time);
-	double walkTree(const int position, const BettingNode* cur_node, const Hand hand);
+	virtual double walkTree(const int position, const BettingNode* cur_node, const Hand hand);
 
 	virtual double getExploitability(const BettingNode* root) const;
 
@@ -208,6 +208,17 @@ public:
 protected:
 
 	//only being used to obtain staretgy
+	const CFR* opponent;
+};
+
+class ES_fixedOpponent : public ES {
+public:
+	ES_fixedOpponent(const Game* game, size_t num_entries_per_bucket[MAX_ROUNDS], const CardAbstraction* abs, const CFR* oppo);
+	~ES_fixedOpponent();
+	
+	virtual int sampleAction(const BettingNode* node, const Hand hand, const int position) const;
+
+protected:
 	const CFR* opponent;
 };
 
